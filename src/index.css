@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: Inter;
+    src: url("../src/assets/fonts/Inter-Variable.ttf") format("truetype");
+}
+
+body {
+    font-family: Inter, sans-serif;
+    background-color: #1c1e22;
+    background-image: url("../src/assets/bg.jpg");
+}
+
+
