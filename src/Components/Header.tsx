@@ -28,9 +28,8 @@ function Header() {
         };
     }, [prevScrollPos]);
     return (
-        <motion.main className={`fixed ${visible ? '' : '-translate-y-18'} duration-500 z-999`}>
-            <div
-                className="bg-[#1b1d20]/50 text-white duration-500 h-16 font-bold lg:text-xl text-md fixed items-center justify-between w-screen border-violet-300 border-b-2 flex px-4 md:px-48 lg:px-64 shadow-violet-400/20 shadow-md">
+            <motion.div
+                className={` ${visible ? '' : '-translate-y-18'} bg-[#1b1d20]/50 text-white fixed z-999 duration-500 h-16 font-bold lg:text-xl left-0 top-0 text-md items-center justify-between w-screen border-violet-300 border-b-2 flex px-4 md:px-48 lg:px-64 shadow-violet-400/20 shadow-md`}>
                 <div className="flex items-center justify-center h-full">
                     <a href="/" className="flex w-auto left-3 relative">
                         <div className="w-12 h-auto">
@@ -52,8 +51,8 @@ function Header() {
                 <motion.div whileHover={{ scale: 1.1 }}>
                     <Link to={"/login"}>Login</Link>
                 </motion.div>
-            </div>
-        </motion.main>
+            </motion.div>
+
     )
 }
 
