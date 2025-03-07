@@ -1,4 +1,5 @@
-
+import { motion } from 'framer-motion'
+import { variants } from "../lib/variants.tsx";
 
 function InfoComponent() {
     const hrbreak = {
@@ -12,7 +13,13 @@ function InfoComponent() {
         fontWeight: "bold",
     }
     return (
-        <div className={"relative flex flex-col max-w-screen h-auto px-4 lg:px-8 mt-40 mb-20 pt-5 pb-10 md:mx-16 lg:mx-32 xl:mx-64 mx-4 self-center bg-gray-900/50 text-white"}>
+        <motion.div
+            initial={"hidden"}
+            animate={"enter"}
+            exit={"exit"}
+            variants={variants}
+            transition={{type: "tween", duration: 1}}
+            className={"relative flex flex-col max-w-screen h-auto px-4 lg:px-8 mt-40 mb-20 pt-5 pb-10 md:mx-16 lg:mx-32 xl:mx-64 mx-4 self-center bg-gray-900/50 text-white"}>
             <p className={"text-lg self-center px-4 md:px-12 lg:px-24"}>
                 <span className={"font-bold text-red-400"}>Vietnam osu! Championship</span> là giải đấu osu!standard lớn nhất,
                 danh giá nhất tại Việt Nam. Được tổ chức bởi <span className={"font-bold text-red-400"}>Vietnam Community League</span>,
@@ -280,7 +287,7 @@ function InfoComponent() {
                     </li>
                 </ul>
             </ul>
-        </div>
+        </motion.div>
     )
 }
 
