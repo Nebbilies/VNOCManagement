@@ -40,29 +40,33 @@ function Header() {
                     <ul className="relative items-center flex h-full ml-2 md:ml-8">
                         {links.map((link, index) => (
                             <motion.li className={" px-2 md:px-3 lg:px-4 duration-100"} key={link.name}
-                                       whileHover={{scale: 1.1}}
                                        initial={{ opacity: 0, x: 0, y: 20 }}
                                        animate={{ opacity: 1, x: 0, y: 0}}
                                        exit={{ opacity: 0, x: 0, y: 0 }}
                                        transition={{ type: "spring", duration: 1.3, ease: "easeOut", delay: index*0.15}}>
-                                <Link to={link.path}>
-                                    {link.name}
-                                </Link>
+                                <motion.div className={'w-full h-full'} whileHover={{scale: 1.1}}>
+                                    <Link to={link.path}>
+                                        {link.name}
+                                    </Link>
+                                </motion.div>
+
                             </motion.li>
                         ))}
                     </ul>
 
                 </div>
-                <motion.div whileHover={{ scale: 1.1 }}
-                            initial={{ opacity: 0, x: 0, y: 20 }}
-                            animate={{ opacity: 1, x: 0, y: 0}}
-                            exit={{ opacity: 0, x: 0, y: 0 }}
-                            transition={{ type: "spring", duration: 1, ease: "easeInOut", delay: 1}}>
-                    <Link to={"/login"}>Login</Link>
+                <motion.div whileHover={{scale: 1.1}}
+                            initial={{opacity: 0, x: 0, y: 20}}
+                            animate={{opacity: 1, x: 0, y: 0}}
+                            exit={{opacity: 0, x: 0, y: 0}}
+                            transition={{type: "spring", duration: 1, ease: "easeInOut", delay: 1}}>
+                    <motion.div className={'w-full h-full'} whileHover={{scale: 1.1}}>
+                        <Link to={"/login"}>Login</Link>
+                    </motion.div>
+                    </motion.div>
                 </motion.div>
-            </motion.div>
 
-    )
-}
+                )
+                }
 
-export default Header
+                export default Header
