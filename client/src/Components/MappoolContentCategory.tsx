@@ -7,7 +7,6 @@ import {MappoolContext} from "../context/MappoolContext.tsx";
 
 interface Props {
     style: MappoolStyle,
-    mappoolData: PoolData,
     index: number,
 }
 
@@ -17,7 +16,6 @@ const exit = {opacity: 0, x: 0, y: -30}
 
 export default function MappoolContentCategory({style, index}: Props) {
     let mappoolData = useContext(MappoolContext)
-    console.log(mappoolData)
     return (
         <motion.div key={style.name}
                     initial={hidden}

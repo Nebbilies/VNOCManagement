@@ -13,10 +13,6 @@ const mapsId: RawPoolData = {
             "id": 2223850,
             "idx": 2,
         },
-        {
-            "id": 2258243,
-            "idx": 3,
-        },
     ],
     "HD": [
         {
@@ -29,23 +25,11 @@ const mapsId: RawPoolData = {
             "id": 2258243,
             "idx": 1,
         },
-        {
-            "id": 2223850,
-            "idx": 2,
-        },
-        {
-            "id": 2258243,
-            "idx": 3,
-        },
     ],
     "DT": [
         {
             "id": 4870736,
             "idx": 1,
-        },
-        {
-            "id": 4870736,
-            "idx": 2,
         },
     ],
     "TB": [
@@ -294,7 +278,6 @@ function MappoolComponent() {
     useEffect(() => {
         fetchMods(mapsId).then((data) => {
             setMappool(data);
-            console.log(mappool);
         });
     }, [mappool]);
   return (
