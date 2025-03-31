@@ -8,6 +8,7 @@ const links = [
     { name: "Info", path: "/info" },
     { name: "Players", path: "/players" },
     { name: "Mappool", path: "/mappool" },
+    { name: "Matches", path: "/matches" },
 ]
 function Header() {
     const [prevScrollPos, setPrevScrollPos] = useState(0);
@@ -37,9 +38,13 @@ function Header() {
                         </div>
                     </a>
                     <ul className="relative items-center flex h-full ml-2 md:ml-8">
-                        {links.map((link) => (
+                        {links.map((link, index) => (
                             <motion.li className={" px-2 md:px-3 lg:px-4 duration-100"} key={link.name}
-                                       whileHover={{scale: 1.1}}>
+                                       whileHover={{scale: 1.1}}
+                                       initial={{ opacity: 0, x: 0, y: 20 }}
+                                       animate={{ opacity: 1, x: 0, y: 0}}
+                                       exit={{ opacity: 0, x: 0, y: 0 }}
+                                       transition={{ type: "spring", duration: 1.3, ease: "easeOut", delay: index*0.15}}>
                                 <Link to={link.path}>
                                     {link.name}
                                 </Link>
@@ -48,7 +53,11 @@ function Header() {
                     </ul>
 
                 </div>
-                <motion.div whileHover={{ scale: 1.1 }}>
+                <motion.div whileHover={{ scale: 1.1 }}
+                            initial={{ opacity: 0, x: 0, y: 20 }}
+                            animate={{ opacity: 1, x: 0, y: 0}}
+                            exit={{ opacity: 0, x: 0, y: 0 }}
+                            transition={{ type: "spring", duration: 1, ease: "easeInOut", delay: 1}}>
                     <Link to={"/login"}>Login</Link>
                 </motion.div>
             </motion.div>

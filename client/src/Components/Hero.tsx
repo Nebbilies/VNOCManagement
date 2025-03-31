@@ -15,7 +15,7 @@ function Hero() {
             animate={"enter"}
             exit={"exit"}
             variants={variants}
-            transition={{type: "tween", duration: 1}}
+            transition={{type: "spring", duration: 1.3, ease: "easeInOut"}}
             >
                 <img src={vnoc2024} alt="logo" className="w-1/2 flex shrink-2"/>
                 <h1 className={"text-white text-4xl font-bold italic pt-8 tracking-wide"}>Giải đấu osu!standard hàng đầu Việt Nam.</h1>
