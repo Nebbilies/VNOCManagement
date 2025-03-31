@@ -71,7 +71,7 @@ let playerData: playerData = {
         "username": "thang random nao do lmao",
         "globalRanking": 29831,
     },
-    "859592": {
+    "11149940": {
         "username": "thang random nao do lmao",
         "globalRanking": 2903,
     },
@@ -84,8 +84,8 @@ let playerData: playerData = {
 function PlayersComponent() {
     return (
         <div className={"mappool-container flex flex-col items-center max-w-screen h-auto px-4 lg:px-8 " +
-            "mt-40 mb-20 pt-10 pb-10 md:mx-16 lg:mx-36 xl:mx-64 mx-4 self-center text-white bg-gray-900/50 rounded-3xl"}>
-            <div className={"mappool-header flex w-full text-5xl font-black items-center"}>
+            "mt-40 mb-20 pt-10 pb-10 md:mx-12 lg:mx-28 xl:mx-40 mx-4 self-center text-white bg-gray-900/50 rounded-3xl"}>
+            <div className={"mappool-header flex w-full lg:text-5xl md:text-4xl text-3xl font-black items-center"}>
                 <div className={"mappool-header-text w-full italic text-center"}>
                     DANH SÁCH NGƯỜI CHƠI
                 </div>
