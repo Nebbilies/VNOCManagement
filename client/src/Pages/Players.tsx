@@ -7,15 +7,9 @@ function Players() {
     return (
         <>
             <Header/>
-            <motion.main
-                initial="hidden"
-                animate="enter"
-                exit="exit"
-                variants={variants}
-                transition={{type: "tween", duration: 1}}
-            >
+            <main>
                 <PlayersComponent/>
-            </motion.main>
+            </main>
         </>
     )
 }
