@@ -1,4 +1,5 @@
 import PlayersGrid from "./PlayersGrid.tsx";
+import {useEffect, useState} from "react";
 
 interface Props {
 
@@ -82,17 +83,36 @@ let playerData: playerData = {
 }
 
 function PlayersComponent() {
+    const [playerSearch, setPlayerSearch] = useState("")
+    const [filteredPlayerData, setFilteredPlayerData] = useState<playerData>(playerData)
+    useEffect(() => {
+        const filteredData = Object.fromEntries(
+            Object.entries(playerData).filter(([id, player]) =>
+                player.username.toLowerCase().includes(playerSearch.toLowerCase())
+            )
+        );
+        setFilteredPlayerData(filteredData);
+    }, [playerSearch]);
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPlayerSearch(event.target.value);
+    };
     return (
         <div className={"mappool-container flex flex-col items-center max-w-screen h-auto px-4 lg:px-8 " +
             "mt-40 mb-20 pt-10 pb-10 md:mx-12 lg:mx-28 xl:mx-40 mx-4 self-center text-white bg-gray-900/50 rounded-3xl"}>
-            <div className={"mappool-header flex w-full lg:text-5xl md:text-4xl text-3xl font-black items-center"}>
+            <div className={"mappool-header flex flex-col w-full lg:text-5xl md:text-4xl text-3xl font-black items-center justify-center"}>
                 <div className={"mappool-header-text w-full italic text-center"}>
                     DANH SÁCH NGƯỜI CHƠI
+                </div>
+                <div className={"mappool-search-form w-full text-center mt-3"}>
+                    <input type="text" placeholder={"Search..."}
+                            value={playerSearch}
+                            onChange={handleSearchChange}
+                           className={"bg-gray-900/80 rounded-lg p-2 text-lg font-medium text-white placeholder:text-gray-400 border-3 border-[#353d60] rounded-[5px]"}/>
                 </div>
             </div>
             <div className={"h-1 w-1/2 border-2 border-white rounded-2xl mt-10"}>
             </div>
-            <PlayersGrid playerData={playerData}/>
+            <PlayersGrid playerData={filteredPlayerData}/>
 
         </div>
     )
