@@ -1,10 +1,6 @@
 import PlayersGrid from "./PlayersGrid.tsx";
 import {useEffect, useState} from "react";
 
-interface Props {
-
-}
-
 export type playerData = Record<string, { username: string, globalRanking: number }>
 
 let playerData: playerData = {

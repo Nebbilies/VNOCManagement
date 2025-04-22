@@ -1,4 +1,4 @@
-import Header from "./Header.tsx";
+import TopHeader from "./TopHeader.tsx";
 import {playerData} from "./PlayersComponent.tsx";
 import MatchesContent from "./MatchesContent.tsx";
 
@@ -74,7 +74,7 @@ const dummyMatchData: MatchData = {
 }
 
 function MatchesComponent(){
-    <Header/>
+    <TopHeader/>
     return (
         <div className={"matches-container flex flex-col max-w-screen h-auto px-4 lg:px-8 " +
             "mt-40 mb-20 pt-5 pb-10 md:mx-10 lg:mx-20 xl:mx-64 mx-4 self-center text-white bg-gray-900/20"}>
