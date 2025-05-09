@@ -9,55 +9,55 @@ let playerData: playerData = {
         "globalRanking": 2903,
     },
     "12931959": {
-        "username": "thang random nao do lmao",
-        "globalRanking": 2903,
-    },
-    "12931932": {
-        "username": "thang random nao do lmao",
-        "globalRanking": 29038,
-    },
-    "12931238": {
-        "username": "thang random nao do lmao",
-        "globalRanking": 831,
-    },
-    "13489359": {
-        "username": "thang random nao do lmao",
-        "globalRanking": 2109831,
-    },
-    "12930293": {
-        "username": "a",
-        "globalRanking": 299831,
-    },
-    "12931483": {
-        "username": "thang random nao do lmao",
-        "globalRanking": 29831,
-    },
-    "7562902": {
-        "username": "thang random nao do lmao",
-        "globalRanking": 2903,
-    },
-    "7696512": {
-        "username": "thang random nao do lmao",
-        "globalRanking": 21,
-    },
-    "234341": {
         "username": "aaa",
         "globalRanking": 2903,
     },
+    "12931932": {
+        "username": "aab",
+        "globalRanking": 29038,
+    },
+    "12931238": {
+        "username": "baba",
+        "globalRanking": 831,
+    },
+    "13489359": {
+        "username": "Nick",
+        "globalRanking": 2109831,
+    },
+    "12930293": {
+        "username": "Ben",
+        "globalRanking": 299831,
+    },
+    "12931483": {
+        "username": "Rachel",
+        "globalRanking": 29831,
+    },
+    "2": {
+        "username": "peppy",
+        "globalRanking": 2903,
+    },
+    "3": {
+        "username": "Dean Herbert",
+        "globalRanking": 21,
+    },
+    "4452992": {
+        "username": "Astra",
+        "globalRanking": 2903,
+    },
     "854439": {
-        "username": "thang random nao do lmao",
+        "username": "Hoang",
         "globalRanking": 2903,
     },
     "1200123": {
-        "username": "thang random nao do lmao",
+        "username": "Vivian",
         "globalRanking": 29038,
     },
     "1212138": {
-        "username": "thang random nao do lmao",
+        "username": "Kiana",
         "globalRanking": 831,
     },
-    "13489539": {
-        "username": "thang random nao do lmao",
+    "9587896": {
+        "username": "Herta",
         "globalRanking": 2109831,
     },
     "1121532": {
@@ -65,15 +65,15 @@ let playerData: playerData = {
         "globalRanking": 299831,
     },
     "1071483": {
-        "username": "thang random nao do lmao",
+        "username": "Salt",
         "globalRanking": 29831,
     },
     "11149940": {
-        "username": "thang random nao do lmao",
+        "username": "Acid",
         "globalRanking": 2903,
     },
     "968942": {
-        "username": "thang random nao do lmao",
+        "username": "Belle",
         "globalRanking": 21,
     },
 }
