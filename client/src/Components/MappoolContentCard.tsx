@@ -1,6 +1,8 @@
+import {useEffect, useRef, useState} from "react";
 import {MapData} from "./MappoolContent.tsx";
 import {MappoolStyle} from "./MappoolContent.tsx";
-
+import { EllipsisVertical } from 'lucide-react';
+import {AnimatePresence, motion} from "motion/react";
 //good habit
 interface Props {
     map: MapData,
@@ -9,7 +11,25 @@ interface Props {
 }
 
 export default function MappoolContentCard({map, style, mod}: Props) {
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    // Close menu on outside click
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setMenuOpen(false);
+            }
+        }
+        if (menuOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [menuOpen]);
     return (
+        <div className={'flex w-full items-center relative'}>
         <div key={map.id}
              className={`mappool-content-map-item inset-shadow-2xs inset-shadow-black flex w-full rounded-3xl text-black h-25 font-bold items-center bg-center bg-cover bg-white/70 sm:bg-white/90`}
              style={{
@@ -92,5 +112,51 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                 </div>
             </div>
         </div>
+            {/* Controller: Edit, Delete */}
+            <button
+                className="mappool-content-map-item-controller w-1/30 flex items-center justify-center cursor-pointer text-gray-400 hover:text-gray-600 transition duration-200 relative"
+                onClick={() => setMenuOpen(v => !v)}
+                aria-label="Open map options"
+            >
+                <EllipsisVertical />
+            </button>
+            <AnimatePresence>
+            {menuOpen && (
+                <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: 'auto', transition: {duration: 0.2} }}
+                    exit={{ height: 0, transition: {delay: 0.2} }}
+                    transition={{ ease: 'easeInOut' }}
+                    ref={menuRef}
+                    className="absolute -right-12 top-20 z-50 bg-[#0e111a] rounded-lg shadow-lg w-35 flex flex-col animate-fade-in"
+                >
+                    <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.1, delay: 0.2 }}
+                        className="px-4 pt-2 pb-1 text-left hover:bg-black w-full text-sm font-bold rounded-t-lg"
+                        onClick={() => { setMenuOpen(false); /*onEdit(map);*/ }}
+                    >
+                        Edit
+                    </motion.button>
+                    <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{
+                            opacity: 1,
+                            transition: {
+                                duration: 0.1, delay: 0.3
+                            }
+                        }}
+                        exit={{ opacity: 0 }}
+                        className="px-4 pb-2 pt-1 text-left hover:bg-red-100 text-red-600 w-full font-bold text-sm rounded-b-lg"
+                        onClick={() => { setMenuOpen(false); /*onDelete(map)*/ }}
+                    >
+                        Delete
+                    </motion.button>
+                </motion.div>
+            )}
+            </AnimatePresence>
+            </div>
     )
 }
