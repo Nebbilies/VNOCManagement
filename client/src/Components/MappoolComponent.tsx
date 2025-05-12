@@ -8,11 +8,11 @@ const mapsId: RawPoolData = {
     "NM": [
         {
             "id": 1363001,
-            "idx": 1,
+            "idx": 4,
         },
         {
             "id": 4977277,
-            "idx": 2,
+            "idx": 1,
         },
     ],
     "HD": [
@@ -100,7 +100,7 @@ type MapResponse = {
 }
 
 async function fetchMappoolData(modMaps: RawMapData[]): Promise<MapData[]> {
-    return await Promise.all(modMaps.map(async ({ id }, idx) => {
+    return await Promise.all(modMaps.map(async ({ id, idx }) => {
         const response = await fetch(`https://tryz.vercel.app/api/b/${id}`);
         const json: MapResponse = await response.json();
         const beatmapData = json.beatmaps.find((map) => map.id === id);
@@ -117,9 +117,33 @@ async function fetchMappoolData(modMaps: RawMapData[]): Promise<MapData[]> {
             AR: beatmapData!.ar,
             OD: beatmapData!.accuracy,
             drain: beatmapData!.hit_length,
-            idx,
+            idx: idx,
         }
     }));
+}
+
+export async function fetchBeatmapData(beatmapSearchId: number) {
+    const response = await fetch(`https://tryz.vercel.app/api/b/${beatmapSearchId}`);
+    const json = await response.json();
+    if ("error" in json) {
+        return ({
+            returnCode: json.error.status,
+            id: -1,
+            artist: '',
+            title: '',
+            difficulty: '',
+        });
+    } else {
+        const jsonData: MapResponse = json;
+        const beatmapData = jsonData.beatmaps.find((map) => map.id === parseInt(beatmapSearchId));
+        return ({
+            returnCode: 200,
+            id: json.id,
+            artist: json.artist,
+            title: json.title,
+            difficulty: beatmapData!.version,
+        });
+    }
 }
 
 const AddBeatmapsButton = () => {
@@ -127,7 +151,7 @@ const AddBeatmapsButton = () => {
     const [beatmapId, setBeatmapId] = useState('');
     const [mappoolName, setMappoolName] = useState('');
     const [slotName, setSlotName] = useState('');
-    const [beatmapSearchId, setBeatmapSearchId] = useState('');
+    const [beatmapSearchId, setBeatmapSearchId] = useState(-1);
     const [beatmapSearchData, setBeatmapSearchData] = useState({
         returnCode: -1,
         id: -1,
@@ -139,32 +163,10 @@ const AddBeatmapsButton = () => {
     const closeModal = () => setIsModalOpen(false);
 
     useEffect(() => {
-        async function fetchBeatmapData() {
-            const response = await fetch(`https://tryz.vercel.app/api/b/${beatmapSearchId}`);
-            const json = await response.json();
-            if ("error" in json) {
-                setBeatmapSearchData({
-                    returnCode: json.error.status,
-                    id: -1,
-                    artist: '',
-                    title: '',
-                    difficulty: '',
-                });
-            } else {
-                const jsonData: MapResponse = json;
-                const beatmapData = jsonData.beatmaps.find((map) => map.id === parseInt(beatmapSearchId));
-                setBeatmapSearchData({
-                    returnCode: 200,
-                    id: json.id,
-                    artist: json.artist,
-                    title: json.title,
-                    difficulty: beatmapData!.version,
-                });
-            }
-            console.log(beatmapSearchData.returnCode)
-        }
-        if (beatmapSearchId) {
-            fetchBeatmapData()
+        if (beatmapSearchId !== -1) {
+            fetchBeatmapData(beatmapSearchId).then((data) => {
+                setBeatmapSearchData(data);
+            });
         }
     }, [beatmapSearchId]);
 
@@ -355,6 +357,10 @@ async function fetchMods(mapsId: RawPoolData): Promise<PoolData> {
     let data: PoolData = {};
     for (const mod of Object.keys(mapsId)) {
         data[mod as keyof PoolData] = await fetchMappoolData(mapsId[mod as keyof PoolData]);
+    }
+    //Sort the data by idx
+    for (const mod of Object.keys(data)) {
+        data[mod as keyof PoolData].sort((a, b) => a.idx - b.idx);
     }
     return data;
 }

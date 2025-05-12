@@ -1,8 +1,9 @@
 import {useEffect, useRef, useState} from "react";
 import {MapData} from "./MappoolContent.tsx";
 import {MappoolStyle} from "./MappoolContent.tsx";
-import { EllipsisVertical } from 'lucide-react';
+import {EllipsisVertical, Search} from 'lucide-react';
 import {AnimatePresence, motion} from "motion/react";
+import {fetchBeatmapData} from "./MappoolComponent.tsx";
 //good habit
 interface Props {
     map: MapData,
@@ -12,6 +13,21 @@ interface Props {
 
 export default function MappoolContentCard({map, style, mod}: Props) {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [beatmapSearchId, setBeatmapSearchId] = useState(-1);
+    const [beatmapSearchData, setBeatmapSearchData] = useState({
+        returnCode: -1,
+        id: -1,
+        artist: '',
+        title: '',
+        difficulty: '',
+    })
+    const [editingMapData, setEditingMapData] = useState(
+        {
+            id: 0,
+            mod: "",
+            idx: 0,
+        }
+    );
     const menuRef = useRef(null);
 
     // Close menu on outside click
@@ -28,6 +44,17 @@ export default function MappoolContentCard({map, style, mod}: Props) {
         }
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [menuOpen]);
+
+    function handleSubmit(e) {
+        e.preventDefault()
+    }
+    useEffect(() => {
+        if (beatmapSearchId !== -1) {
+            fetchBeatmapData(beatmapSearchId).then((data) => {
+                setBeatmapSearchData(data);
+            });
+        }
+    }, [beatmapSearchId]);
     return (
         <div className={'flex w-full items-center relative'}>
         <div key={map.id}
@@ -40,7 +67,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                 className={`mappool-content-map-item-slot w-1/12 h-full rounded-l-3xl ${style.slotName === "TB" ? 'text-black' : 'text-white'} text-lg lg:text-xl`}
                 style={{backgroundColor: style.color}}>
                                         <span
-                                            className={'flex items-center justify-center h-full transform -rotate-90'}>{mod}{map.idx + 1}</span>
+                                            className={'flex items-center justify-center h-full transform -rotate-90'}>{mod}{map.idx}</span>
             </div>
             <img className={`object-cover h-full w-auto sm:flex hidden rounded-r-3xl`}
                  src={`https://assets.ppy.sh/beatmaps/${map.beatmapsetId}/covers/raw.jpg`}
@@ -136,7 +163,15 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.1, delay: 0.2 }}
                         className="px-4 pt-2 pb-1 text-left hover:bg-black w-full text-sm font-bold rounded-t-lg"
-                        onClick={() => { setMenuOpen(false); /*onEdit(map);*/ }}
+                        onClick={() => {
+                            setMenuOpen(false);
+                            setEditingMapData({
+                                id: map.id,
+                                mod: mod,
+                                idx: map.idx,
+                            })
+                            setBeatmapSearchId(map.id)
+                        }}
                     >
                         Edit
                     </motion.button>
@@ -156,6 +191,162 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                     </motion.button>
                 </motion.div>
             )}
+            </AnimatePresence>
+
+            {/* Edit Map Modal */}
+            <AnimatePresence>
+                {editingMapData.id === map.id && (
+                    <>
+                        {/* Overlay */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.6 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-gray-700 blur-l z-40"
+                            onClick={() => {
+                                setEditingMapData({
+                                    id: 0,
+                                    mod: "",
+                                    idx: 0,
+                                })
+                            }}
+                        />
+
+                        {/* Modal */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
+                        >
+                            <h2 className="text-xl font-semibold mb-4 text-white">Add Beatmap</h2>
+
+                            <form onSubmit={handleSubmit}>
+                                <div className="mb-4">
+                                    <label htmlFor="beatmapId" className="block text-sm font-medium text-white mb-1">
+                                        Beatmap ID
+                                    </label>
+                                    <div className={'flex'}>
+                                        <input
+                                            type="text"
+                                            id="beatmapId"
+                                            value={editingMapData.id}
+                                            onChange={(e) => setEditingMapData(
+                                                (prev) => ({ ...prev, id: parseInt(e.target.value) })
+                                            )}
+                                            className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
+                                            required
+                                        />
+                                        <button className={'bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1'}
+                                            onClick={() => {setBeatmapSearchId(editingMapData.id)}}
+                                        >
+                                            <Search className={'w-8 h-8'}/>
+                                        </button>
+                                    </div>
+                                </div>
+                                {/* Beatmap Search Result */
+                                    //--------------------
+                                    //--------------------
+                                    // REMEMBER TO CHECK FOR ADDITIONAL CONDITIONS WHEN BACKEND FINISHES
+                                    // 1. MAKE MAPPOOL NAME A DROP DOWN OF ROUNDS
+                                    // 2. CHECK IF SLOT NAME EXISTS IN MAPPOOL
+                                    //---------------------
+                                    //--------------------
+                                }
+                                {beatmapSearchData.returnCode === 404 ? (
+                                    <div className="text-red-500 text-sm">
+                                        Beatmap not found
+                                    </div>
+                                ) : null}
+                                {beatmapSearchData.returnCode === 200 ? (
+                                    <div
+                                        className={`mappool-content-map-item flex w-full rounded-3xl text-black h-20 font-bold items-center bg-center bg-cover bg-white/70 sm:bg-white/90 border-2 border-white `}
+                                        style={{
+                                            backgroundImage: `url('https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg')`,
+                                            backgroundBlendMode: 'overlay'
+                                        }}>
+                                        <img className={`object-cover h-full w-auto sm:flex hidden rounded-r-3xl rounded-l-3xl`}
+                                             src={`https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg`}
+                                             alt={'bg'}/>
+                                        <div
+                                            className={`mappool-content-map-item-info flex flex-col w-7/12 h-full px-3 justify-start text-start overflow-hidden`}
+                                        >
+                                            <div
+                                                className={'mappool-content-map-item-info-name text-lg font-bold truncate inline'}>
+                                                {beatmapSearchData.title}
+                                            </div>
+                                            <div
+                                                className={`mappool-content-map-item-info-artist  w-full text-xs font-normal truncate`}>
+                                                {beatmapSearchData.artist}
+                                            </div>
+                                            <div
+                                                className={'mappool-content-map-item-info-mapper flex w-full text-xs font-bold mt-3 truncate'}>
+                                                {beatmapSearchData.difficulty}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : null}
+
+                                {/* Mappool Name and Slot Name */}
+                                <div className="flex gap-4 mt-4 mb-6">
+                                    <div className="w-1/2">
+                                        <label htmlFor="mod" className="block text-sm font-medium text-white mb-1">
+                                            Mod
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="mod"
+                                            value={editingMapData.mod}
+                                            onChange={(e) => setEditingMapData(
+                                                (prev) => ({ ...prev, mod: e.target.value })
+                                            )}
+                                            className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="w-1/2">
+                                        <label htmlFor="slotName" className="block text-sm font-medium text-white mb-1">
+                                            Slot Name
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="slotName"
+                                            value={editingMapData.idx}
+                                            onChange={(e) => setEditingMapData(
+                                                (prev) => ({ ...prev, idx: parseInt(e.target.value) })
+                                            )}
+                                            className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-center gap-2 w-full h-12">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEditingMapData({
+                                                id: 0,
+                                                mod: "",
+                                                idx: 0,
+                                            })
+                                        }}
+                                        className="text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors cursor-pointer"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${beatmapSearchData.returnCode === 200 ? 'cursor-pointer' : "cursor-not-allowed opacity-50"} `}
+                                    >
+                                        Confirm
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </>
+                )}
             </AnimatePresence>
             </div>
     )
