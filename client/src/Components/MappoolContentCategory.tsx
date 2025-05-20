@@ -10,9 +10,9 @@ interface Props {
     index: number,
 }
 
-const hidden = {opacity: 0, x: 0, y: -30}
+const hidden = {opacity: 0, x: 0}
 const enter = {opacity: 1, x: 0, y: 0}
-const exit = {opacity: 0, x: 0, y: -30}
+const exit = {opacity: 0, x: 0}
 
 export default function MappoolContentCategory({style, index}: Props) {
     let mappoolData = useContext(MappoolContext)
@@ -21,7 +21,7 @@ export default function MappoolContentCategory({style, index}: Props) {
                     initial={hidden}
                     animate={enter}
                     exit={exit}
-                    transition={{ type: "spring", duration: 1, ease: "easeInOut", delay: index*0.15 }}>
+                    transition={{ delay: index*0.15 }}>
             <div
                 className={'mappool-content-style flex w-full mt-5 rounded-3xl p-4 font-bold items-center h-12'}
                 style={{backgroundColor: style.color, color: style.textColor}}>

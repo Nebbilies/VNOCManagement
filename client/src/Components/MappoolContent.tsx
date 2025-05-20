@@ -21,7 +21,7 @@ export interface PoolData {
 
 export interface MapData {
     id: number,
-    beatmapsetId: string,
+    beatmapsetId: number,
     name: string,
     artist: string,
     difficulty: string,

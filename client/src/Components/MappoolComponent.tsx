@@ -1,5 +1,5 @@
 import MappoolContent from "./MappoolContent.tsx";
-import {useEffect, useState, createContext, useContext} from "react";
+import {useEffect, useState} from "react";
 import {motion, AnimatePresence} from "motion/react";
 import {MappoolContext} from "../context/MappoolContext.tsx";
 import { Search } from "lucide-react";
@@ -55,7 +55,7 @@ interface PoolData {
 
 interface MapData {
     id: number,
-    beatmapsetId: string,
+    beatmapsetId: number,
     name: string,
     artist: string,
     difficulty: string,
@@ -83,7 +83,7 @@ interface RawPoolData {
 }
 
 type MapResponse = {
-    id: string,
+    id: number,
     artist: string,
     title: string,
     creator: string,
@@ -135,7 +135,7 @@ export async function fetchBeatmapData(beatmapSearchId: number) {
         });
     } else {
         const jsonData: MapResponse = json;
-        const beatmapData = jsonData.beatmaps.find((map) => map.id === parseInt(beatmapSearchId));
+        const beatmapData = jsonData.beatmaps.find((map) => map.id === beatmapSearchId);
         return ({
             returnCode: 200,
             id: json.id,
@@ -247,7 +247,7 @@ const AddBeatmapsButton = () => {
                                             required
                                         />
                                         <button className={'bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1'}
-                                        onClick = {() => setBeatmapSearchId(beatmapId)}
+                                        onClick = {() => setBeatmapSearchId(beatmapSearchId)}
                                         >
                                             <Search className={'w-8 h-8'}/>
                                         </button>

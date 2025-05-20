@@ -221,7 +221,6 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
                         >
                             <h2 className="text-xl font-semibold mb-4 text-white">Add Beatmap</h2>
-
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-4">
                                     <label htmlFor="beatmapId" className="block text-sm font-medium text-white mb-1">
