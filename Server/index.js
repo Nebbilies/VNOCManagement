@@ -1,22 +1,23 @@
 require('dotenv').config();
 const cors = require("cors");
-
 const express = require("express");
-const app = express()
+const cookieParser = require("cookie-parser");
+
+const app = express();
 
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
 }));
-6
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
 
+app.use(cookieParser());
+app.use(express.json());
 
 const OAuthRouter = require("./routes/OAuthRouter.js");
-
 app.use("/api/auth", OAuthRouter);
 
+const PlayerRouter = require("./routes/PlayerRouter");
+app.use("/api/players", PlayerRouter);
 
 app.listen(3001, () => {
     console.log("Server running on http://localhost:3001");

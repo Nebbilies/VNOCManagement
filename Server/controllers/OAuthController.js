@@ -8,7 +8,6 @@ const REDIRECT_URI = "http://localhost:3001/api/auth/callback";
 
 module.exports = {
     login(req, res) {
-        console.log("➡️ /login hit");
 
         const state = Buffer.from(JSON.stringify({ redirectTo: req.query.redirect || "/" })).toString("base64");
 
@@ -21,7 +20,6 @@ module.exports = {
         });
 
         const redirectUrl = `https://osu.ppy.sh/oauth/authorize?${params}`;
-        console.log("🔗 Redirecting to:", redirectUrl);
         res.redirect(redirectUrl);
     },
 
