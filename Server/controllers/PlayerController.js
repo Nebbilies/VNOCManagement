@@ -5,7 +5,6 @@ module.exports = {
     async addPlayer(req, res) {
         console.log("[addPlayer] Request received");
 
-        // Kiểm tra cookie osu_token
         const token = req.cookies.osu_token;
         console.log("[addPlayer] osu_token from cookies:", token);
 
@@ -15,7 +14,6 @@ module.exports = {
         }
 
         try {
-            // Gọi API osu! để lấy thông tin user dựa trên token
             const osuRes = await axios.get("https://osu.ppy.sh/api/v2/me", {
                 headers: {
                     Authorization: `Bearer ${token}`,

@@ -101,8 +101,8 @@ function PlayersComponent() {
                 </div>
                 <div className={"mappool-search-form w-full text-center mt-3"}>
                     <input type="text" placeholder={"Search..."}
-                            value={playerSearch}
-                            onChange={handleSearchChange}
+                           value={playerSearch}
+                           onChange={handleSearchChange}
                            className={"bg-gray-900/80 rounded-lg p-2 text-lg font-medium text-white placeholder:text-gray-400 border-3 border-[#353d60] rounded-[5px]"}/>
                 </div>
             </div>
