@@ -134,20 +134,23 @@
 // export default TopHeader;
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion"; // ✅ Đúng package là 'framer-motion', không phải 'motion/react'
+import { motion } from "framer-motion";
+import { Player } from "./PlayersComponent";
 
 interface Props {
     links: Array<{ name: string; path: string }>;
     logo: string;
+    onJoinSuccess: (player: Player) => void;
 }
 
 interface User {
-    id: number;
+    id: string;
     username: string;
     avatar_url?: string;
+    globalRanking?: number;
 }
 
-function TopHeader({ links, logo }: Props) {
+function TopHeader({ links, logo, onJoinSuccess }: Props) {
     const [prevScrollPos, setPrevScrollPos] = useState(0);
     const [visible, setVisible] = useState(true);
     const [user, setUser] = useState<User | null>(null);
@@ -191,7 +194,7 @@ function TopHeader({ links, logo }: Props) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({}), // nếu cần gửi dữ liệu thêm thì điền vào đây
+                body: JSON.stringify({}),
             });
 
             const data = await res.json();
@@ -200,15 +203,24 @@ function TopHeader({ links, logo }: Props) {
                 if (data.message === "Player already registered") {
                     alert("Bạn đã đăng ký rồi!");
                     if (data.player) {
-                        setUser(data.player); // cập nhật user với dữ liệu player từ backend
+                        setUser(data.player);
+                        localStorage.setItem("newPlayer", JSON.stringify(data.player));
+                        window.dispatchEvent(new Event("newPlayerRegistered"));
+                        onJoinSuccess?.(data.player);
                     }
                 } else if (data.message === "Player registered") {
                     alert("🎉 Đăng ký thành công!");
-                    setUser({
+                    const newPlayer: Player = {
                         id: data.id,
                         username: data.username,
-                        avatar_url: data.avatar_url, // nếu có avatar gửi về
-                    });
+                        avatar_url: data.avatar_url,
+                        globalRanking: data.globalRanking || 0,
+                        profile_url: data.profile_url,
+                    };
+                    setUser(newPlayer);
+                    localStorage.setItem("newPlayer", JSON.stringify(newPlayer));
+                    window.dispatchEvent(new Event("newPlayerRegistered"));
+                    onJoinSuccess?.(newPlayer);
                 } else {
                     alert("🎉 Đăng ký thành công!");
                 }
@@ -221,14 +233,11 @@ function TopHeader({ links, logo }: Props) {
         }
     };
 
-
     return (
         <motion.div
-            className={`${
-                visible ? "translate-y-0" : "-translate-y-18"
-            } bg-[#1b1d20]/50 text-white fixed z-50 duration-500 h-16 font-bold lg:text-xl left-0 top-0 text-md items-center justify-between w-screen border-violet-300 border-b-2 hidden lg:flex px-4 md:px-48 lg:px-64 shadow-violet-400/20 shadow-md transition-transform`}
+            className={`${visible ? "translate-y-0" : "-translate-y-18"}
+        bg-[#1b1d20]/50 text-white fixed z-50 duration-500 h-16 font-bold lg:text-xl left-0 top-0 text-md items-center justify-between w-screen border-violet-300 border-b-2 hidden lg:flex px-4 md:px-48 lg:px-64 shadow-violet-400/20 shadow-md transition-transform`}
         >
-            {/* Logo + Links */}
             <div className="flex items-center justify-center h-full">
                 <a href="/" className="flex w-auto left-3 relative">
                     <div className="w-12 h-auto">
@@ -258,7 +267,6 @@ function TopHeader({ links, logo }: Props) {
                 </ul>
             </div>
 
-            {/* User Section */}
             <motion.div
                 whileHover={{ scale: 1.05 }}
                 initial={{ opacity: 0, y: 20 }}

@@ -1,9 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from "@tailwindcss/vite";
+import tailwindcss from "@tailwindcss/vite"
 import mkcert from 'vite-plugin-mkcert'
 
-// ✅ Thêm đường proxy
 export default defineConfig({
     plugins: [
         react(),
@@ -15,9 +14,10 @@ export default defineConfig({
         port: 5173,
         proxy: {
             '/api': {
-                target: 'http://localhost:3001', // Địa chỉ backend
+                target: 'http://localhost:3001',
                 changeOrigin: true,
-                rewrite: path => path.replace(/^\/api/, '')
+                secure: false // not strictly needed for http, but safe to include
+                // ❌ remove rewrite — keep the path as-is
             }
         }
     }
