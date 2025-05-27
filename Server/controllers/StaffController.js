@@ -35,7 +35,7 @@ module.exports = {
     async removeStaff(req, res) {
         console.log("[removeStaff] Request received");
 
-        if (req.user.role !== "admin") {
+        if (req.user.role !== "ADMIN") {
             console.log("[removeStaff] Forbidden access by non-admin");
             return res.status(403).json({ error: "Forbidden" });
         }
@@ -60,7 +60,7 @@ module.exports = {
     async getAllStaff(req, res) {
         console.log("[getAllStaff] Request received");
 
-        if (req.user.role !== "admin") {
+        if (req.user.role !== "ADMIN") {
             console.log("[getAllStaff] Forbidden access by non-admin");
             return res.status(403).json({ error: "Forbidden" });
         }

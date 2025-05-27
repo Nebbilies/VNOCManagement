@@ -14,10 +14,29 @@ module.exports = async function checkRole(req, res, next) {
         });
 
         const userId = userInfo.data.id;
+        const username = userInfo.data.username;
 
-        const [rows] = await pool.query("SELECT * FROM staffs WHERE id = ?", [userId]);
-        req.user = { id: userId, username: userInfo.data.username };
-        req.user.role = rows.length > 0 ? "admin" : "player";
+        let role = "GUEST"; // default
+
+        // Check staffs table
+        const [staffRows] = await pool.query("SELECT Role FROM staffs WHERE Id = ?", [userId]);
+
+        if (staffRows.length > 0) {
+            role = staffRows[0].Role; // COMMENTATOR, REFEREE, etc.
+        } else {
+            // If not in staff, check players table
+            const [playerRows] = await pool.query("SELECT Id FROM players WHERE Id = ?", [userId]);
+            if (playerRows.length > 0) {
+                role = "PLAYER";
+            }
+        }
+
+        req.user = {
+            id: userId,
+            username: username,
+            role: role,
+        };
+
         next();
     } catch (err) {
         console.error("checkRole failed:", err.message);
