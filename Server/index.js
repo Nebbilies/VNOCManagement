@@ -1,0 +1,27 @@
+require('dotenv').config();
+const cors = require("cors");
+const express = require("express");
+const cookieParser = require("cookie-parser");
+
+const app = express();
+
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
+
+app.use(cookieParser());
+app.use(express.json());
+
+const OAuthRouter = require("./routes/OAuthRouter.js");
+app.use("/api/auth", OAuthRouter);
+
+const PlayerRouter = require("./routes/PlayerRouter.js");
+app.use("/api/players", PlayerRouter);
+
+const StaffRouter = require("./routes/StaffRouter.js");
+app.use("/api/staff", StaffRouter);
+
+app.listen(3001, () => {
+    console.log("Server running on http://localhost:3001");
+});
