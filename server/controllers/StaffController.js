@@ -1,36 +1,53 @@
 const pool = require("../database/db");
+const osuService = require("../service/GetUserInfo");
 
 module.exports = {
+
     async addStaff(req, res) {
         console.log("[addStaff] Request received");
 
-        const { Username, Role } = req.body;
+        const { id, role } = req.body;
+        const token = req.cookies.osu_token;
 
-        if (!Username || !Role) {
-            console.log("[addStaff] Missing Username or Role");
-            return res.status(400).json({ error: "Username and Role are required." });
+        if (!id || !role) {
+            console.log("[addStaff] Missing ID or Role");
+            return res.status(400).json({ error: "ID and Role are required." });
+        }
+
+        if (!token) {
+            console.log("[addStaff] Missing osu! token");
+            return res.status(401).json({ error: "Not authenticated with osu!" });
         }
 
         try {
-            const [existing] = await pool.query("SELECT * FROM staffs WHERE Username = ?", [Username]);
-            console.log("[addStaff] Existing staff query result:", existing);
+            // Fetch user info from osu! API
+            const user = await osuService.getUserById(id, token);
+            const username = user.username;
 
+            console.log("[addStaff] osu! user fetched:", username);
+
+            // Check if staff already exists
+            const [existing] = await pool.query("SELECT * FROM staffs WHERE Username = ?", [username]);
             if (existing.length > 0) {
+                console.log("[addStaff] Staff already exists:", username);
                 return res.status(200).json({
                     message: "Staff already exists",
                     staff: existing[0],
                 });
             }
 
-            await pool.query("INSERT INTO staffs (Username, Role) VALUES (?, ?)", [Username, Role]);
-            console.log("[addStaff] Staff registered successfully:", { Username, Role });
+            // Insert new staff
+            await pool.query("INSERT INTO staffs (Username, Role) VALUES (?, ?)", [username, role]);
+            console.log("[addStaff] Staff registered successfully:", { username, role });
 
-            return res.json({ message: "Staff registered", Username, Role });
+            return res.json({ message: "Staff registered", username, role });
+
         } catch (err) {
-            console.error("[addStaff] Error occurred:", err);
+            console.error("[addStaff] Error occurred:", err.message);
             return res.status(500).json({ error: "Failed to register staff" });
         }
     },
+
 
     async removeStaff(req, res) {
         console.log("[removeStaff] Request received");
