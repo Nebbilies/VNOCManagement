@@ -60,7 +60,6 @@ module.exports = {
     },
 
     async getAllPlayers(req, res) {
-        if (req.user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
 
         try {
             const [players] = await pool.query("SELECT * FROM players");
