@@ -27,7 +27,7 @@ module.exports = {
             console.log("[addStaff] osu! user fetched:", username);
 
             // Check if staff already exists
-            const [existing] = await pool.query("SELECT * FROM staffs WHERE Username = ?", [username]);
+            const [existing] = await pool.query("SELECT * FROM staffs WHERE id = ?", id);
             if (existing.length > 0) {
                 console.log("[addStaff] Staff already exists:", username);
                 return res.status(200).json({
@@ -37,8 +37,8 @@ module.exports = {
             }
 
             // Insert new staff
-            await pool.query("INSERT INTO staffs (Username, Role) VALUES (?, ?)", [username, role]);
-            console.log("[addStaff] Staff registered successfully:", { username, role });
+            await pool.query("INSERT INTO staffs (id, Role, Username) VALUES (?, ?, ?)", [id, role, username]);
+            console.log("[addStaff] Staff registered successfully:", { id, role, username });
 
             return res.json({ message: "Staff registered", username, role });
 
@@ -76,11 +76,6 @@ module.exports = {
 
     async getAllStaff(req, res) {
         console.log("[getAllStaff] Request received");
-
-        if (req.user.role !== "ADMIN") {
-            console.log("[getAllStaff] Forbidden access by non-admin");
-            return res.status(403).json({ error: "Forbidden" });
-        }
 
         try {
             const [staffList] = await pool.query("SELECT * FROM staffs");
