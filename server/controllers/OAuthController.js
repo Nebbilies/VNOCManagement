@@ -1,3 +1,4 @@
+const pool = require("../database/db");
 const axios = require("axios");
 const querystring = require("querystring");
 
@@ -41,14 +42,15 @@ module.exports = {
                 }
             );
 
+            console.log(tokenResponse);
+
             const { access_token } = tokenResponse.data;
 
             res.cookie("osu_token", access_token, {
                 httpOnly: true,
                 secure: false,
-                sameSite: none,
+                sameSite: 'lax',
                 maxAge: 1000 * 60 * 60 * 24,
-                path: '/'
             });
 
 
@@ -73,18 +75,41 @@ module.exports = {
         const token = req.cookies.osu_token;
         if (!token) return res.status(401).json({ error: "Not logged in" });
 
+        console.log("Access token:", token);
+
         try {
-            const userInfo = await axios.get("http://osu.ppy.sh/api/v2/me", {
+            const userInfo = await axios.get("https://osu.ppy.sh/api/v2/me", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
 
+            const userId = userInfo.data.id;
+            const username = userInfo.data.username;
+            const avatar_url = userInfo.data.avatar_url;
+
+            let role = "GUEST"; // Default
+
+            // Check staffs table
+            const [staffRows] = await pool.query("SELECT Role FROM staffs WHERE Id = ?", [userId]);
+            if (staffRows.length > 0) {
+                role = staffRows[0].Role;
+            } else {
+                // Check players table
+                const [playerRows] = await pool.query("SELECT Id FROM players WHERE Id = ?", [userId]);
+                if (playerRows.length > 0) {
+                    role = "PLAYER";
+                }
+            }
+
             res.json({
-                id: userInfo.data.id,
-                username: userInfo.data.username,
-                avatar_url: userInfo.data.avatar_url,
+                id: userId,
+                username: username,
+                avatar_url: avatar_url,
+                role: role
             });
+
+            console.log(`[getUser] ${username} | Role: ${role}`);
         } catch (error) {
             console.error("Failed to fetch user:", error.response?.data || error.message);
             res.status(500).json({ error: "Failed to fetch user info" });
