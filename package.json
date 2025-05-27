@@ -1,8 +1,0 @@
-{
-  "private": true,
-  "name": "vnoc-management",
-  "workspaces": [
-    "Server",
-    "client"
-  ]
-}
