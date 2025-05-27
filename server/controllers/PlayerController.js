@@ -47,10 +47,18 @@ module.exports = {
     },
 
     async removePlayer(req, res) {
-        if (req.user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+        if (req.user.role !== "ADMIN") return res.status(403).json({ error: "Forbidden" });
 
         const id = req.params.id;
+
         try {
+            // Check if player exists
+            const [rows] = await pool.query("SELECT * FROM players WHERE id = ?", [id]);
+            if (rows.length === 0) {
+                return res.status(404).json({ error: "Player not found" });
+            }
+
+            // Delete player
             await pool.query("DELETE FROM players WHERE id = ?", [id]);
             res.json({ message: "Player removed" });
         } catch (err) {
