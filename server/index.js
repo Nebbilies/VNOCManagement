@@ -13,6 +13,12 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
+app.use((req, res, next) => {
+    console.log(`[REQUEST] ${req.method} ${req.originalUrl}`);
+    next();
+});
+
+
 const OAuthRouter = require("./routes/OAuthRouter.js");
 app.use("/api/auth", OAuthRouter);
 

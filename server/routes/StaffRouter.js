@@ -16,8 +16,8 @@ const requireAdmin = (req, res, next) => {
 };
 
 // Admin-only routes
-router.post('/staff', requireAdmin, StaffController.addStaff);
-router.delete('/staff/:id', requireAdmin, StaffController.removeStaff);
-router.get('/staff', requireAdmin, StaffController.getAllStaff);
+router.post('/add', requireAdmin, StaffController.addStaff);
+router.delete('/remove/:id', requireAdmin, StaffController.removeStaff);
+router.get('/all', StaffController.getAllStaff);
 
 module.exports = router;
