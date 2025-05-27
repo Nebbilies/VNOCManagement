@@ -12,13 +12,11 @@ interface Props {
 
 function SidebarHeader({ links, logo }: Props) {
     const [isOpen, setIsOpen] = useState(false);
-
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
     };
     const [prevScrollPos, setPrevScrollPos] = useState(0);
     const [visible, setVisible] = useState(true);
-
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollPos = window.scrollY;
@@ -33,6 +31,7 @@ function SidebarHeader({ links, logo }: Props) {
             window.removeEventListener('scroll', handleScroll);
         };
     }, [prevScrollPos]);
+    const user = JSON.parse(window.localStorage.getItem("user") || "null");
     return (
         <div className="lg:hidden">
             {/* Mobile Header Bar */}
@@ -117,13 +116,27 @@ function SidebarHeader({ links, logo }: Props) {
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.3 }}
                             >
-                                <Link
-                                    to="/login"
-                                    className="block w-full text-center py-2 px-4 bg-violet-600 rounded-md"
-                                    onClick={toggleSidebar}
-                                >
-                                    Login
-                                </Link>
+
+                                {!user ? (
+                                    <Link
+                                        to="http://localhost:3001/api/auth/login"
+                                        className="block w-full text-center py-2 px-4 bg-violet-600 rounded-md"
+                                        onClick={toggleSidebar}
+                                    >
+                                        Login
+                                    </Link>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        {user.avatar_url ? (
+                                            <img
+                                                src={user.avatar_url}
+                                                alt="avatar"
+                                                className="rounded-full w-6 h-6 border border-white"
+                                            />
+                                        ) : null}
+                                        <span className={'text-lg'}>{user.username}</span>
+                                    </div>
+                                )}
                             </motion.div>
                         </div>
                     </motion.div>

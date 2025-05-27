@@ -41,9 +41,6 @@ module.exports = {
                     headers: { "Content-Type": "application/json" },
                 }
             );
-
-            console.log(tokenResponse);
-
             const { access_token } = tokenResponse.data;
 
             res.cookie("osu_token", access_token, {
@@ -74,9 +71,6 @@ module.exports = {
     async getUser(req, res) {
         const token = req.cookies.osu_token;
         if (!token) return res.status(401).json({ error: "Not logged in" });
-
-        console.log("Access token:", token);
-
         try {
             const userInfo = await axios.get("https://osu.ppy.sh/api/v2/me", {
                 headers: {
@@ -87,7 +81,6 @@ module.exports = {
             const userId = userInfo.data.id;
             const username = userInfo.data.username;
             const avatar_url = userInfo.data.avatar_url;
-
             let role = "GUEST"; // Default
 
             // Check staffs table
@@ -101,15 +94,12 @@ module.exports = {
                     role = "PLAYER";
                 }
             }
-
             res.json({
                 id: userId,
                 username: username,
                 avatar_url: avatar_url,
                 role: role
             });
-
-            console.log(`[getUser] ${username} | Role: ${role}`);
         } catch (error) {
             console.error("Failed to fetch user:", error.response?.data || error.message);
             res.status(500).json({ error: "Failed to fetch user info" });
