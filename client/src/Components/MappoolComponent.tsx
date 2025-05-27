@@ -150,7 +150,8 @@ const AddBeatmapsButton = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [beatmapId, setBeatmapId] = useState('');
     const [mappoolName, setMappoolName] = useState('');
-    const [slotName, setSlotName] = useState('');
+    const [mod, setMod] = useState('');
+    const [index, setIndex] = useState('');
     const [beatmapSearchId, setBeatmapSearchId] = useState(-1);
     const [beatmapSearchData, setBeatmapSearchData] = useState({
         returnCode: -1,
@@ -239,7 +240,7 @@ const AddBeatmapsButton = () => {
                                     </label>
                                     <div className={'flex'}>
                                         <input
-                                            type="text"
+                                            type="number"
                                             id="beatmapId"
                                             value={beatmapId}
                                             onChange={(e) => setBeatmapId(e.target.value)}
@@ -247,7 +248,7 @@ const AddBeatmapsButton = () => {
                                             required
                                         />
                                         <button className={'bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1'}
-                                        onClick = {() => setBeatmapSearchId(beatmapSearchId)}
+                                        onClick = {() => setBeatmapSearchId(parseInt(beatmapId))}
                                         >
                                             <Search className={'w-8 h-8'}/>
                                         </button>
@@ -313,18 +314,35 @@ const AddBeatmapsButton = () => {
                                         />
                                     </div>
 
-                                    <div className="w-1/2">
-                                        <label htmlFor="slotName" className="block text-sm font-medium text-white mb-1">
-                                            Slot Name
+                                    <div className="w-1/4">
+                                        <label htmlFor="mod" className="block text-sm font-medium text-white mb-1">
+                                            Mod
+                                        </label>
+                                        <select
+                                            id="mod"
+                                            value={mod}
+                                            onChange={(e) => setMod(e.target.value)}
+                                            className="w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"
+                                            required>
+                                            <option value="NM">NM</option>
+                                            <option value="HD">HD</option>
+                                            <option value="HR">HR</option>
+                                            <option value="DT">DT</option>
+                                            <option value="TB">TB</option>
+                                        </select>
+                                    </div>
+                                    <div className="w-1/4">
+                                        <label htmlFor="index" className="block text-sm font-medium text-white mb-1">
+                                            Index
                                         </label>
                                         <input
-                                            type="text"
-                                            id="slotName"
-                                            value={slotName}
-                                            onChange={(e) => setSlotName(e.target.value)}
-                                            className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
-                                            required
-                                        />
+                                            id="index"
+                                            value={index}
+                                            type="number"
+                                            onChange={(e) => setIndex(e.target.value)}
+                                            className="w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"
+                                            required>
+                                        </input>
                                     </div>
                                 </div>
 

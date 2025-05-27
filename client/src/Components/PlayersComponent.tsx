@@ -1,92 +1,67 @@
 import PlayersGrid from "./PlayersGrid.tsx";
 import {useEffect, useState} from "react";
 
-export type playerData = Record<string, { username: string, globalRanking: number }>
-
-let playerData: playerData = {
-    "10635981": {
-        "username": "- Nebby -",
-        "globalRanking": 2903,
-    },
-    "12931959": {
-        "username": "aaa",
-        "globalRanking": 2903,
-    },
-    "12931932": {
-        "username": "aab",
-        "globalRanking": 29038,
-    },
-    "12931238": {
-        "username": "baba",
-        "globalRanking": 831,
-    },
-    "13489359": {
-        "username": "Nick",
-        "globalRanking": 2109831,
-    },
-    "12930293": {
-        "username": "Ben",
-        "globalRanking": 299831,
-    },
-    "12931483": {
-        "username": "Rachel",
-        "globalRanking": 29831,
-    },
-    "2": {
-        "username": "peppy",
-        "globalRanking": 2903,
-    },
-    "3": {
-        "username": "Dean Herbert",
-        "globalRanking": 21,
-    },
-    "4452992": {
-        "username": "Astra",
-        "globalRanking": 2903,
-    },
-    "854439": {
-        "username": "Hoang",
-        "globalRanking": 2903,
-    },
-    "1200123": {
-        "username": "Vivian",
-        "globalRanking": 29038,
-    },
-    "1212138": {
-        "username": "Kiana",
-        "globalRanking": 831,
-    },
-    "9587896": {
-        "username": "Herta",
-        "globalRanking": 2109831,
-    },
-    "1121532": {
-        "username": "a",
-        "globalRanking": 299831,
-    },
-    "1071483": {
-        "username": "Salt",
-        "globalRanking": 29831,
-    },
-    "11149940": {
-        "username": "Acid",
-        "globalRanking": 2903,
-    },
-    "968942": {
-        "username": "Belle",
-        "globalRanking": 21,
-    },
+export interface Player {
+    id: number,
+    username: string,
+    globalRanking: number,
 }
+
+export type PlayerData = Player[]
+
+let playerData: PlayerData = [
+    {
+        id: 10635981,
+        username: "- Nebby -",
+        globalRanking: 2903,
+    },
+    {
+        id: 7696512,
+        username: "Hoaq",
+        globalRanking: 2903,
+    },
+    {
+        id: 12561202,
+        username: "TKieen",
+        globalRanking: 29038,
+    },
+    {
+        id: 14047619,
+        username: "Zeigler",
+        globalRanking: 831,
+    },
+    {
+        id: 12345678,
+        username: "Player1",
+        globalRanking: 1000,
+    },
+    {
+        id: 87654321,
+        username: "Player2",
+        globalRanking: 2000,
+    },
+    {
+        id: 13579246,
+        username: "Player3",
+        globalRanking: 3000,
+    },
+    {
+        id: 24681357,
+        username: "Player4",
+        globalRanking: 4000,
+    },
+]
+
 
 function PlayersComponent() {
     const [playerSearch, setPlayerSearch] = useState("")
-    const [filteredPlayerData, setFilteredPlayerData] = useState<playerData>(playerData)
+    const [filteredPlayerData, setFilteredPlayerData] = useState<PlayerData>(playerData)
     useEffect(() => {
-        const filteredData = Object.fromEntries(
-            Object.entries(playerData).filter(([id, player]) =>
+        const filteredData =
+            playerData.filter((player) =>
                 player.username.toLowerCase().includes(playerSearch.toLowerCase())
-            )
-        );
+                || player.id.toString().includes(playerSearch)
+            );
         setFilteredPlayerData(filteredData);
     }, [playerSearch]);
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {

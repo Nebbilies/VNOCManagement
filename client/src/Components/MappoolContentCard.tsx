@@ -228,7 +228,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                     </label>
                                     <div className={'flex'}>
                                         <input
-                                            type="text"
+                                            type="number"
                                             id="beatmapId"
                                             value={editingMapData.id}
                                             onChange={(e) => setEditingMapData(
