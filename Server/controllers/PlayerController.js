@@ -6,7 +6,6 @@ module.exports = {
         console.log("[addPlayer] Request received");
 
         const token = req.cookies.osu_token;
-        console.log("[addPlayer] osu_token from cookies:", token);
 
         if (!token) {
             console.log("[addPlayer] No osu_token found in cookies. Returning 401 Unauthorized");
@@ -19,29 +18,25 @@ module.exports = {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            console.log("[addPlayer] osu! API response data:", osuRes.data);
 
-            const { id, username, avatar_url } = osuRes.data;
+            const { id, username, statistics } = osuRes.data;
+            const rank = statistics?.global_rank || null;
 
-            // Kiểm tra xem player đã tồn tại trong DB chưa
             const [existing] = await pool.query("SELECT * FROM players WHERE id = ?", [id]);
             console.log("[addPlayer] Existing player query result:", existing);
 
             if (existing.length > 0) {
-                // Trả về dữ liệu player đã có
                 return res.status(200).json({
                     message: "Player already registered",
-                    player: existing[0],  // player dữ liệu lấy từ DB
+                    player: existing[0],
                 });
             }
 
 
             // Thêm player mới vào DB
-            await pool.query("INSERT INTO players (id, username, avatar_url) VALUES (?, ?, ?)", [
-                id,
-                username,
-                avatar_url,
-            ]);
+            await pool.query("INSERT INTO players (Id, Username, `Rank`, `Status`) VALUES (?, ?, ?, 'QUALIFIED')",
+                [id, username, rank]
+            );
             console.log("[addPlayer] Player registered successfully:", { id, username });
 
             return res.json({ message: "Player registered", id, username });

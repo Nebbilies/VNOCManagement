@@ -1,4 +1,3 @@
-// controllers/OAuthController.js
 const axios = require("axios");
 const querystring = require("querystring");
 
@@ -47,9 +46,11 @@ module.exports = {
             res.cookie("osu_token", access_token, {
                 httpOnly: true,
                 secure: false,
-                sameSite: "lax",
+                sameSite: none,
                 maxAge: 1000 * 60 * 60 * 24,
+                path: '/'
             });
+
 
             let redirectTo = "/";
             if (req.query.state) {

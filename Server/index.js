@@ -16,8 +16,11 @@ app.use(express.json());
 const OAuthRouter = require("./routes/OAuthRouter.js");
 app.use("/api/auth", OAuthRouter);
 
-const PlayerRouter = require("./routes/PlayerRouter");
+const PlayerRouter = require("./routes/PlayerRouter.js");
 app.use("/api/players", PlayerRouter);
+
+const StaffRouter = require("./routes/StaffRouter.js");
+app.use("/api/staff", StaffRouter);
 
 app.listen(3001, () => {
     console.log("Server running on http://localhost:3001");

@@ -1,4 +1,3 @@
-// routes/OAuthRouter.js
 const express = require("express");
 const router = express.Router();
 const OAuthController = require("../controllers/OAuthController");
