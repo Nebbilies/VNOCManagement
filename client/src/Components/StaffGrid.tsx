@@ -2,6 +2,7 @@ import {Staff} from "./StaffComponent.tsx";
 import {useState} from "react";
 import {AnimatePresence, motion} from "motion/react";
 import {Trash2} from "lucide-react";
+import SuccessPrompt from "./SuccessPrompt.tsx";
 
 const hidden = {opacity: 0, x: 0, y: -10}
 const enter = {opacity: 1, x: 0, y: 0}
@@ -12,7 +13,26 @@ interface Props {
 }
 
 function onDeleteStaff(id: number) {
-    // Call API here
+    fetch(`http://localhost:3001/api/staff/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+    })
+        .then((res) => {
+            if (!res.ok) throw new Error("Failed to delete staff");
+            return res.json();
+        })
+        .then(() => {
+            <SuccessPrompt message={'Staff deleted successfully! \n Reloading...'}/>
+            setTimeout(() => {
+                    window.location.reload();
+                },
+                2000 // Wait for 2 seconds before reloading
+            )
+
+        })
+        .catch((error) => {
+            console.error("Error deleting staff:", error);
+        });
 }
 
 function StaffGrid({staffList}: Props) {
@@ -22,21 +42,21 @@ function StaffGrid({staffList}: Props) {
         <div className={'grid grid-cols-[repeat(auto-fill,150px)] w-full gap-4'}>
             {staffList.map((staff, index) => (
                     <motion.div className={'h-full w-full'}
-                                key={staff.id}
+                                key={staff.Id}
                                 initial={hidden}
                                 animate={enter}
                                 exit={exit}
                                 transition={{type: "spring", duration: 0.6, ease: "easeInOut", delay: index * 0.05}}>
                         <motion.div
                             whileHover={{scale: 1.05}}
-                            onMouseEnter={() => setHoveredStaff(staff.id)}
+                            onMouseEnter={() => setHoveredStaff(staff.Id)}
                             onMouseLeave={() => setHoveredStaff(0)}
-                            key={staff.id}
+                            key={staff.Id}
                             className="player-card bg-[#131724] border-8 border-[#353d60] rounded-[12px] flex flex-col w-full relative">
-                            {hoveredStaff === staff.id && (
+                            {hoveredStaff === staff.Id && (
                                 <button
                                     onClick={() =>
-                                        setDeleteStaff(staff.id)
+                                        setDeleteStaff(staff.Id)
                                     }
                                     className="absolute top-1.5 right-2 z-10 bg-[#0e111a] rounded-full p-2 hover:bg-red-900 transition-colors"
                                     aria-label="Delete player"
@@ -46,19 +66,19 @@ function StaffGrid({staffList}: Props) {
                             )}
                             <div
                                 className={"text-center px-2 py-3 truncate inline overflow-hidden text-md font-bold w-full border-b-8 border-[#353d60]"}>
-                                {staff.username}
+                                {staff.Username}
                             </div>
                             <div className={`player-info w-full relative cursor-pointer`} onClick={() => {
-                                window.open(`https://osu.ppy.sh/users/${staff.id}`, "_blank")
+                                window.open(`https://osu.ppy.sh/users/${staff.Id}`, "_blank")
                             }}>
-                                <img alt="player avatar" src={`https://a.ppy.sh/${staff.id}`}
+                                <img alt="player avatar" src={`https://a.ppy.sh/${staff.Id}`}
                                      className={"w-full aspect-auto rounded-b-[5px] "}/>
 
                             </div>
                         </motion.div>
                         {/* Confirmation modal */}
                         <AnimatePresence>
-                            {deleteStaff == staff.id && (
+                            {deleteStaff == staff.Id && (
                                 <>
                                     <motion.div
                                         initial={{opacity: 0}}
@@ -78,7 +98,7 @@ function StaffGrid({staffList}: Props) {
                                         className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg p-6 z-50 w-96"
                                     >
                                         <div className="bg-[#23263a] rounded-lg p-6 text-white">
-                                            <div>Are you sure you want to delete <b>{staff.username}</b>?</div>
+                                            <div>Are you sure you want to delete <b>{staff.Username}</b>?</div>
                                             <div className="mt-4 flex gap-3">
                                                 <button onClick={() =>
                                                     setDeleteStaff(0)
@@ -87,7 +107,7 @@ function StaffGrid({staffList}: Props) {
                                                 </button>
                                                 <button onClick={() => {
                                                     setDeleteStaff(0)
-                                                    onDeleteStaff(staff.id);
+                                                    onDeleteStaff(staff.Id);
                                                 }} className="px-4 py-2 bg-red-600 rounded hover:bg-red-700">Delete
                                                 </button>
                                             </div>

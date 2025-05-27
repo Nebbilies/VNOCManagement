@@ -8,7 +8,6 @@ module.exports = {
 
         const { id, role } = req.body;
         const token = req.cookies.osu_token;
-
         if (!id || !role) {
             console.log("[addStaff] Missing ID or Role");
             return res.status(400).json({ error: "ID and Role are required." });
@@ -30,8 +29,8 @@ module.exports = {
             const [existing] = await pool.query("SELECT * FROM staffs WHERE id = ?", id);
             if (existing.length > 0) {
                 console.log("[addStaff] Staff already exists:", username);
-                return res.status(200).json({
-                    message: "Staff already exists",
+                return res.status(400).json({
+                    error: "Staff already exists",
                     staff: existing[0],
                 });
             }

@@ -1,43 +1,65 @@
 import {Plus} from "lucide-react";
 import {AnimatePresence, motion} from "motion/react";
 import React, {useState} from "react";
+import SuccessPrompt from "./SuccessPrompt.tsx";
+import ErrorPrompt from "./ErrorPrompt.tsx";
 
-export function AddStaffButton() {
+interface Props {
+    toggleRefresh: (refresh: boolean) => void;
+}
+
+export function AddStaffButton({toggleRefresh}: Props) {
     const [HoveringAddStaff, setHoveringAddStaff] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [userId, setUserId] = useState<number>();
-    const [position, setPosition] = useState<string>('');
+    const [position, setPosition] = useState<string>('ADMIN');
+    const [loading, setLoading] = useState(false);
+    const [showSuccessPrompt, setShowSuccessPrompt] = useState("");
+    const [showErrorPrompt, setShowErrorPrompt] = useState("");
     const openModal = () => {
         setIsModalOpen(true);
     }
     const closeModal = () => {
         setIsModalOpen(false);
-        setUserId(undefined);
-        setPosition('');
+        setPosition('ADMIN');
     };
     const handleSubmit = async (e: React.FormEvent) => {
+        setLoading(true);
         e.preventDefault();
         if (!userId || !position) {
             alert('Please fill in all fields');
+            console.log(userId, position);
+            setLoading(false);
             return;
         }
-        /*try {
-            const response = await fetch('/api/staff', {
+        try {
+            const response = await fetch('http://localhost:3001/api/staff/add', {
+                credentials: 'include',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userId, position }),
+                body: JSON.stringify({ id: userId, role: position }),
             });
             if (!response.ok) {
+                const errorData = await response.json();
+                setShowErrorPrompt(errorData.error);
                 throw new Error('Network response was not ok');
             }
-            alert('Staff added successfully');
-            closeModal();
+            setShowSuccessPrompt("Staff added successfully!");
+            toggleRefresh(true);
         } catch (error) {
-            console.error('Error adding staff:', error);
-            alert('Failed to add staff');
-        }*/
+            console.log(error);
+        }
+        closeModal();
+        setTimeout(
+            () => {
+                setLoading(false);
+                setShowSuccessPrompt("");
+                setShowErrorPrompt("");
+            },
+            4000
+        )
     };
     return (
         <>
@@ -113,11 +135,11 @@ export function AddStaffButton() {
                                             onChange={(e) => setPosition(e.target.value)}
                                             className="w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"
                                             required>
-                                            <option value="admin">Admin</option>
-                                            <option value="referee">Referee</option>
-                                            <option value="streamer">Streamer</option>
-                                            <option value="commentator">Commentator</option>
-                                            <option value="mappooler">Mappooler</option>
+                                            <option value="ADMIN">Admin</option>
+                                            <option value="REFEREE">Referee</option>
+                                            <option value="STREAMER">Streamer</option>
+                                            <option value="COMMENTATOR">Commentator</option>
+                                            <option value="MAPPOOLER">Mappooler</option>
                                         </select>
                                     </div>
                                 </div>
@@ -125,13 +147,13 @@ export function AddStaffButton() {
                                     <button
                                         type="button"
                                         onClick={closeModal}
-                                        className="text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors cursor-pointer"
+                                        className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} flex items-center justify-center`}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors`}
+                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                                     >
                                         Confirm
                                     </button>
@@ -139,6 +161,14 @@ export function AddStaffButton() {
                             </form>
                         </motion.div>
                     </>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {showSuccessPrompt !== "" && (
+                    <SuccessPrompt message={showSuccessPrompt} />
+                )}
+                {showErrorPrompt !== "" && (
+                    <ErrorPrompt error={showErrorPrompt} />
                 )}
             </AnimatePresence>
         </>

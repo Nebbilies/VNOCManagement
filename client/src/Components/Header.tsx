@@ -1,7 +1,8 @@
 import TopHeader from "./TopHeader.tsx";
 import SidebarHeader from "./SidebarHeader.tsx";
 import logo from "../assets/logo.png";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
+import {UserContext} from "../context/UserContext.tsx";
 
 const links = [
     {name: "Staff", path: "/staff"},
@@ -12,6 +13,7 @@ const links = [
 ]
 
 function Header() {
+    const { user, setUser } = useContext(UserContext);
     useEffect(() => {
         fetch("http://localhost:3001/api/auth/me", {
             credentials: "include",
@@ -20,9 +22,8 @@ function Header() {
                 if (!res.ok) throw new Error("Not logged in");
                 return res.json();
             })
-            .then((data) => window.localStorage.setItem("user", JSON.stringify(data)))
-            .catch(() => window.localStorage.setItem("user", JSON.stringify(null)));
-
+            .then((data) => setUser(data))
+            .catch(() => setUser(null));
     }, []);
     return (
         <>
