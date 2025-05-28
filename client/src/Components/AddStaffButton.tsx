@@ -1,8 +1,7 @@
 import {Plus} from "lucide-react";
 import {AnimatePresence, motion} from "motion/react";
 import React, {useState} from "react";
-import SuccessPrompt from "./SuccessPrompt.tsx";
-import ErrorPrompt from "./ErrorPrompt.tsx";
+import { useToast } from "../context/ToastContext.tsx";
 
 interface Props {
     toggleRefresh: (refresh: boolean) => void;
@@ -14,8 +13,7 @@ export function AddStaffButton({toggleRefresh}: Props) {
     const [userId, setUserId] = useState<number>();
     const [position, setPosition] = useState<string>('ADMIN');
     const [loading, setLoading] = useState(false);
-    const [showSuccessPrompt, setShowSuccessPrompt] = useState("");
-    const [showErrorPrompt, setShowErrorPrompt] = useState("");
+    const {showSuccess, showError} = useToast();
     const openModal = () => {
         setIsModalOpen(true);
     }
@@ -43,10 +41,10 @@ export function AddStaffButton({toggleRefresh}: Props) {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                setShowErrorPrompt(errorData.error);
+                showError(errorData.error || 'Failed to add staff');
                 throw new Error('Network response was not ok');
             }
-            setShowSuccessPrompt("Staff added successfully!");
+            showSuccess(`Staff with ID ${userId} added successfully!`);
             toggleRefresh(true);
         } catch (error) {
             console.log(error);
@@ -55,8 +53,6 @@ export function AddStaffButton({toggleRefresh}: Props) {
         setTimeout(
             () => {
                 setLoading(false);
-                setShowSuccessPrompt("");
-                setShowErrorPrompt("");
             },
             4000
         )
@@ -161,14 +157,6 @@ export function AddStaffButton({toggleRefresh}: Props) {
                             </form>
                         </motion.div>
                     </>
-                )}
-            </AnimatePresence>
-            <AnimatePresence>
-                {showSuccessPrompt !== "" && (
-                    <SuccessPrompt message={showSuccessPrompt} />
-                )}
-                {showErrorPrompt !== "" && (
-                    <ErrorPrompt error={showErrorPrompt} />
                 )}
             </AnimatePresence>
         </>

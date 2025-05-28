@@ -1,6 +1,7 @@
 import StaffGrid from "./StaffGrid";
 import {AddStaffButton} from "./AddStaffButton.tsx";
 import {useState, useEffect} from "react";
+import {Loading} from "./Loading.tsx";
 
 export const roles = [
     "Admin",
@@ -22,6 +23,7 @@ export interface Staff {
 function StaffComponent() {
     const [staff, setStaff] = useState<Staff[]>([]);
     const [refresh, setRefresh] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
     useEffect(() => {
         fetch("http://localhost:3001/api/staff/all", {
             credentials: "include",
@@ -33,6 +35,7 @@ function StaffComponent() {
             .then((data) => setStaff(data))
             .catch((error) => console.error("Error fetching staff:", error));
         setRefresh(false);
+        setLoading(false);
     }, [refresh]);
     return (
         <div className={"mappool-container flex flex-col items-center max-w-screen h-auto px-4 lg:px-8 " +
@@ -43,17 +46,23 @@ function StaffComponent() {
             </div>
             <div className={"h-1 w-1/2 border-2 border-white rounded-2xl mt-10"}></div>
                 <div className={'w-full flex flex-col items-center justify-center'}>
-                    {roles.map(role => (
-                        <div key={role} className={"flex flex-col w-full items-start justify-center mt-8"}>
-                            <h2 className={"text-4xl font-bold"}>{role}</h2>
-                            <div className={"flex flex-col w-full items-start justify-center mt-5"}>
-                                <StaffGrid staffList={staff.filter(staff => staff.Role === role.toUpperCase())}/>
-                            </div>
-                        </div>
-                    ))}
+                    {loading ? (
+                            <Loading/>
+                        ) :
+                        roles.map(role => (
+                                <div key={role} className={"flex flex-col w-full items-start justify-center mt-8"}>
+                                    <h2 className={"text-4xl font-bold"}>{role}</h2>
+                                    <div className={"flex flex-col w-full items-start justify-center mt-5"}>
+                                        <StaffGrid staffList={staff.filter(staff => staff.Role === role.toUpperCase())}
+                                                    toggleRefresh={setRefresh}
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        }
                 </div>
             </div>
-            )
-            }
+    )
+}
 
             export default StaffComponent

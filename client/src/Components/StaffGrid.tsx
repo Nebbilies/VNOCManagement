@@ -2,7 +2,7 @@ import {Staff} from "./StaffComponent.tsx";
 import {useState} from "react";
 import {AnimatePresence, motion} from "motion/react";
 import {Trash2} from "lucide-react";
-import SuccessPrompt from "./SuccessPrompt.tsx";
+import {useToast} from "../context/ToastContext.tsx";
 
 const hidden = {opacity: 0, x: 0, y: -10}
 const enter = {opacity: 1, x: 0, y: 0}
@@ -10,34 +10,41 @@ const exit = {opacity: 0, x: 0, y: -10}
 
 interface Props {
     staffList: Staff[]
+    toggleRefresh: (refresh: boolean) => void;
 }
 
-function onDeleteStaff(id: number) {
-    fetch(`http://localhost:3001/api/staff/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-    })
-        .then((res) => {
-            if (!res.ok) throw new Error("Failed to delete staff");
-            return res.json();
-        })
-        .then(() => {
-            <SuccessPrompt message={'Staff deleted successfully! \n Reloading...'}/>
-            setTimeout(() => {
-                    window.location.reload();
-                },
-                2000 // Wait for 2 seconds before reloading
-            )
 
-        })
-        .catch((error) => {
-            console.error("Error deleting staff:", error);
-        });
-}
 
-function StaffGrid({staffList}: Props) {
+function StaffGrid({staffList, toggleRefresh}: Props) {
     const [hoveredStaff, setHoveredStaff] = useState(0)
     const [deleteStaff, setDeleteStaff] = useState<number>()
+    const [loading, setLoading] = useState(false);
+    const {showSuccess, showError} = useToast();
+    const onDeleteStaff = async (staffId: number) => {
+        setLoading(true);
+        try {
+            const response = await fetch(`http://localhost:3001/api/staff/remove/${staffId}`, {
+                credentials: 'include',
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                showError(errorData);
+                throw new Error('Network response was not ok');
+            }
+            showSuccess(`Staff ${staffId} deleted successfully!`);
+            toggleRefresh(true);
+        } catch (error) {
+            console.log(error);
+        }
+        setDeleteStaff(0);
+        setTimeout(
+            () => {
+                setLoading(false);
+            },
+            4000
+        )
+    }
     return  (
         <div className={'grid grid-cols-[repeat(auto-fill,150px)] w-full gap-4'}>
             {staffList.map((staff, index) => (
@@ -103,12 +110,14 @@ function StaffGrid({staffList}: Props) {
                                                 <button onClick={() =>
                                                     setDeleteStaff(0)
                                                 }
-                                                        className="px-4 py-2 bg-gray-500 rounded hover:bg-gray-600">Cancel
+                                                        className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                                                    Cancel
                                                 </button>
                                                 <button onClick={() => {
-                                                    setDeleteStaff(0)
                                                     onDeleteStaff(staff.Id);
-                                                }} className="px-4 py-2 bg-red-600 rounded hover:bg-red-700">Delete
+                                                }}
+                                                        className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                                                    Delete
                                                 </button>
                                             </div>
                                         </div>
@@ -120,6 +129,7 @@ function StaffGrid({staffList}: Props) {
                     </motion.div>
             ))}
         </div>
+
     )
 }
 
