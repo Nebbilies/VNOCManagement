@@ -1,8 +1,8 @@
 import TopHeader from "./TopHeader.tsx";
 import SidebarHeader from "./SidebarHeader.tsx";
 import logo from "../assets/logo.png";
-import {useContext, useEffect, useState} from "react";
-import {UserContext} from "../context/UserContext.tsx";
+import {useEffect} from "react";
+import {useUser} from "../context/UserContext.tsx";
 
 const links = [
     {name: "Staff", path: "/staff"},
@@ -13,7 +13,7 @@ const links = [
 ]
 
 function Header() {
-    const { user, setUser } = useContext(UserContext);
+    const { setUser } = useUser()
     useEffect(() => {
         fetch("http://localhost:3001/api/auth/me", {
             credentials: "include",
