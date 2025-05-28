@@ -6,20 +6,25 @@ import Mappool from "./Pages/Mappool.tsx";
 import Players from "./Pages/Players.tsx";
 import Matches from "./Pages/Matches.tsx";
 import Header from "./Components/Header.tsx";
+import {ToastProvider} from "./context/ToastContext.tsx";
 
 function App() {
   return (
-      <><BrowserRouter>
-          <Header/>
-          <Routes>
-              <Route index element={<Home/>}/>
-              <Route path="/staff" element={<Staff/>}/>
-              <Route path={"/info"} element={<Info/>}/>
-              <Route path={"/mappool"} element={<Mappool/>}/>
-              <Route path={"/players"} element={<Players/>}/>
-              <Route path={"/matches"} element={<Matches/>}/>
-          </Routes>
-      </BrowserRouter></>
+      <>
+          <ToastProvider>
+              <BrowserRouter>
+                  <Header/>
+                  <Routes>
+                      <Route index element={<Home/>}/>
+                      <Route path="/staff" element={<Staff/>}/>
+                      <Route path={"/info"} element={<Info/>}/>
+                      <Route path={"/mappool"} element={<Mappool/>}/>
+                      <Route path={"/players"} element={<Players/>}/>
+                      <Route path={"/matches"} element={<Matches/>}/>
+                  </Routes>
+              </BrowserRouter>
+          </ToastProvider>
+      </>
   )
 }
 
