@@ -28,6 +28,9 @@ app.use("/api/players", PlayerRouter);
 const StaffRouter = require("./routes/StaffRouter.js");
 app.use("/api/staff", StaffRouter);
 
+const MapRouter = require("./routes/MapRouter.js");
+app.use("/api/maps", MapRouter);
+
 app.listen(3001, () => {
     console.log("Server running on http://localhost:3001");
 });
