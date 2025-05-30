@@ -87,6 +87,33 @@ module.exports = {
             console.error("[editMap] Error:", err);
             res.status(500).json({ error: "Failed to update beatmap" });
         }
-    }
+    },
 
+    async deleteMap(req, res) {
+        const { round, index, mod } = req.body;
+
+        if (!["MAPPOOLER", "ADMIN"].includes(req.user.role)) {
+            return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+        }
+
+        if (!round || !index || !mod) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        try {
+            const [result] = await pool.query(
+                "DELETE FROM map WHERE `Round` = ? AND `Index` = ? AND `Mod` = ?",
+                [round, index, mod]
+            );
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "Beatmap not found" });
+            }
+
+            res.json({ message: "Beatmap deleted successfully" });
+        } catch (err) {
+            console.error("[deleteMap] Error:", err);
+            res.status(500).json({ error: "Failed to delete beatmap" });
+        }
+    }
 };
