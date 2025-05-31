@@ -18,7 +18,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
 const OAuthRouter = require("./routes/OAuthRouter.js");
 app.use("/api/auth", OAuthRouter);
 
@@ -31,9 +30,11 @@ app.use("/api/staff", StaffRouter);
 const MapRouter = require("./routes/MapRouter.js");
 app.use("/api/maps", MapRouter);
 
-const RoundRouter = require("./routes/RoundRouter");
-app.use("/round", RoundRouter);
+const RoundRouter = require("./routes/RoundRouter.js");
+app.use("/api/round", RoundRouter);
 
+const matchRouter = require("./routes/MatchRouter.js");
+app.use("/api/match", matchRouter);
 
 app.listen(3001, () => {
     console.log("Server running on http://localhost:3001");
