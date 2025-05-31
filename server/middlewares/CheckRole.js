@@ -36,7 +36,6 @@ module.exports = async function checkRole(req, res, next) {
             username: username,
             role: role,
         };
-
         next();
     } catch (err) {
         console.error("checkRole failed:", err.message);

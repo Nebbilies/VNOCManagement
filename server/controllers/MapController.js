@@ -118,7 +118,6 @@ module.exports = {
     async getAllMaps(req, res) {
         try {
             const [roundRows] = await pool.query("SELECT Acronym FROM rounds");
-
             const finalResult = {};
 
             for (const roundRow of roundRows) {
@@ -135,9 +134,22 @@ module.exports = {
                     NM: [], HD: [], HR: [], DT: [], TB: []
                 };
 
-                for (const row of mapRows) {
-                    const beatmap = await getBeatmapInfo(row.id, row.idx);
-                    roundResult[row.Mod].push(beatmap);
+                const beatmapPromises = mapRows.map(async row => {
+                    try {
+                        const beatmap = await getBeatmapInfo(row.id, row.idx);
+                        return { mod: row.Mod, beatmap };
+                    } catch (err) {
+                        console.error(`[getAllMaps] Failed to fetch beatmap ID ${row.id} (Mod: ${row.Mod}, Index: ${row.idx}):`, err.message);
+                        return null; // skip this one
+                    }
+                });
+
+
+                const beatmaps = await Promise.all(beatmapPromises);
+
+                for (const entry of beatmaps) {
+                    if (!entry) continue; // skip failed ones
+                    roundResult[entry.mod].push(entry.beatmap);
                 }
 
                 finalResult[round] = roundResult;
@@ -149,5 +161,4 @@ module.exports = {
             res.status(500).json({ error: "Failed to retrieve all maps" });
         }
     }
-
 };
