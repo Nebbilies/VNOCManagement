@@ -20,8 +20,21 @@ module.exports = {
             };
 
             for (const row of rows) {
-                const beatmap = await getBeatmapInfo(row.id, row.idx);
-                result[row.Mod].push(beatmap);
+                result[row.Mod].push({
+                    id: row.Id,
+                    beatmapsetId: row.BeatmapsetId,
+                    name: row.Name,
+                    artist: row.Artist,
+                    difficulty: row.Difficulty,
+                    mapper: row.Mapper,
+                    SR: row.SR,
+                    BPM: row.BPM,
+                    drain: row.Drain,
+                    CS: row.CS,
+                    AR: row.AR,
+                    OD: row.OD,
+                    idx: row.Index
+                });
             }
 
             return res.json(result);
@@ -43,9 +56,27 @@ module.exports = {
         }
 
         try {
+            // Fetch beatmap data from osu! API
+            const beatmap = await getBeatmapInfo(id, index);
+
             await pool.query(
-                "INSERT INTO map (`Round`, `Id`, `Mod`, `Index`) VALUES (?, ?, ?, ?)",
-                [round, id, mod, index]
+                `INSERT INTO map 
+            (\`Round\`, \`Id\`, \`Mod\`, \`Index\`, BeatmapsetId, Name, Artist, Difficulty, Mapper, SR, BPM, Drain, CS, AR, OD)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    round, id, mod, index,
+                    beatmap.beatmapsetId,
+                    beatmap.name,
+                    beatmap.artist,
+                    beatmap.difficulty,
+                    beatmap.mapper,
+                    beatmap.SR,
+                    beatmap.BPM,
+                    beatmap.drain,
+                    beatmap.CS,
+                    beatmap.AR,
+                    beatmap.OD
+                ]
             );
 
             res.json({ message: "Beatmap added successfully" });
@@ -124,7 +155,7 @@ module.exports = {
                 const round = roundRow.Acronym;
 
                 const [mapRows] = await pool.query(
-                    "SELECT Id AS id, `Mod`, `Index` AS idx FROM map WHERE Round = ?",
+                    "SELECT * FROM map WHERE Round = ?",
                     [round]
                 );
 
@@ -134,22 +165,22 @@ module.exports = {
                     NM: [], HD: [], HR: [], DT: [], TB: []
                 };
 
-                const beatmapPromises = mapRows.map(async row => {
-                    try {
-                        const beatmap = await getBeatmapInfo(row.id, row.idx);
-                        return { mod: row.Mod, beatmap };
-                    } catch (err) {
-                        console.error(`[getAllMaps] Failed to fetch beatmap ID ${row.id} (Mod: ${row.Mod}, Index: ${row.idx}):`, err.message);
-                        return null; // skip this one
-                    }
-                });
-
-
-                const beatmaps = await Promise.all(beatmapPromises);
-
-                for (const entry of beatmaps) {
-                    if (!entry) continue; // skip failed ones
-                    roundResult[entry.mod].push(entry.beatmap);
+                for (const row of mapRows) {
+                    roundResult[row.Mod].push({
+                        id: row.Id,
+                        beatmapsetId: row.BeatmapsetId,
+                        name: row.Name,
+                        artist: row.Artist,
+                        difficulty: row.Difficulty,
+                        mapper: row.Mapper,
+                        SR: row.SR,
+                        BPM: row.BPM,
+                        drain: row.Drain,
+                        CS: row.CS,
+                        AR: row.AR,
+                        OD: row.OD,
+                        idx: row.Index
+                    });
                 }
 
                 finalResult[round] = roundResult;
