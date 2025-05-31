@@ -57,7 +57,6 @@ module.exports = {
                 },
                 Staff: matchStaffMap[m.Id] || []
             }));
-            console.log(result);
             res.json(result);
         } catch (err) {
             console.error("[getAllMatches] Error:", err);

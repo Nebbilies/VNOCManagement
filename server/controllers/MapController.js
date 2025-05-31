@@ -1,4 +1,5 @@
 const pool = require("../database/db");
+const getBeatmapInfo = require("../service/GetBeatmapInfo");
 
 module.exports = {
     async getMapsByRound(req, res) {
@@ -15,19 +16,12 @@ module.exports = {
             }
 
             const result = {
-                NM: [],
-                HD: [],
-                HR: [],
-                DT: [],
-                TB: [],
+                NM: [], HD: [], HR: [], DT: [], TB: []
             };
 
             for (const row of rows) {
-                if (result[row.Mod]) {
-                    result[row.Mod].push({ id: row.id, idx: row.idx });
-                } else {
-                    result[row.Mod] = [{ id: row.id, idx: row.idx }];
-                }
+                const beatmap = await getBeatmapInfo(row.id, row.idx);
+                result[row.Mod].push(beatmap);
             }
 
             return res.json(result);
@@ -122,35 +116,38 @@ module.exports = {
     },
 
     async getAllMaps(req, res) {
-        console.log("your mom");
         try {
-            const [rows] = await pool.query(`
-                SELECT \`Round\`, Id AS id, \`Mod\`, \`Index\` AS idx FROM map
-            `);
-            console.log(rows);
-            const result = {};
+            const [roundRows] = await pool.query("SELECT Acronym FROM rounds");
 
-            for (const row of rows) {
-                const { Round, Mod, id, idx } = row;
-                if (!result[Round]) {
-                    result[Round] = {
-                        NM: [],
-                        HD: [],
-                        HR: [],
-                        DT: [],
-                        TB: []
-                    };
+            const finalResult = {};
+
+            for (const roundRow of roundRows) {
+                const round = roundRow.Acronym;
+
+                const [mapRows] = await pool.query(
+                    "SELECT Id AS id, `Mod`, `Index` AS idx FROM map WHERE Round = ?",
+                    [round]
+                );
+
+                if (mapRows.length === 0) continue;
+
+                const roundResult = {
+                    NM: [], HD: [], HR: [], DT: [], TB: []
+                };
+
+                for (const row of mapRows) {
+                    const beatmap = await getBeatmapInfo(row.id, row.idx);
+                    roundResult[row.Mod].push(beatmap);
                 }
 
-                // Push into correct mod group under the round
-                result[Round][Mod].push({ id, idx });
+                finalResult[round] = roundResult;
             }
 
-            console.log(result);
-            res.json(result);
+            res.json(finalResult);
         } catch (err) {
-            console.error("[getAllMapsGrouped] Error:", err);
+            console.error("[getAllMaps] Error:", err.message);
             res.status(500).json({ error: "Failed to retrieve all maps" });
         }
     }
+
 };
