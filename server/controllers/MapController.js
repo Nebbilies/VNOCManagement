@@ -10,6 +10,10 @@ module.exports = {
                 [roundAcronym]
             );
 
+            if (rows.length === 0) {
+                return res.status(404).json({ error: `No maps found for round '${roundAcronym}'` });
+            }
+
             const result = {
                 NM: [],
                 HD: [],
@@ -114,6 +118,39 @@ module.exports = {
         } catch (err) {
             console.error("[deleteMap] Error:", err);
             res.status(500).json({ error: "Failed to delete beatmap" });
+        }
+    },
+
+    async getAllMaps(req, res) {
+        console.log("your mom");
+        try {
+            const [rows] = await pool.query(`
+                SELECT \`Round\`, Id AS id, \`Mod\`, \`Index\` AS idx FROM map
+            `);
+            console.log(rows);
+            const result = {};
+
+            for (const row of rows) {
+                const { Round, Mod, id, idx } = row;
+                if (!result[Round]) {
+                    result[Round] = {
+                        NM: [],
+                        HD: [],
+                        HR: [],
+                        DT: [],
+                        TB: []
+                    };
+                }
+
+                // Push into correct mod group under the round
+                result[Round][Mod].push({ id, idx });
+            }
+
+            console.log(result);
+            res.json(result);
+        } catch (err) {
+            console.error("[getAllMapsGrouped] Error:", err);
+            res.status(500).json({ error: "Failed to retrieve all maps" });
         }
     }
 };
