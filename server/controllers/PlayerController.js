@@ -47,25 +47,30 @@ module.exports = {
     },
 
     async removePlayer(req, res) {
-        if (req.user.role !== "ADMIN") return res.status(403).json({ error: "Forbidden" });
+        const id = parseInt(req.params.id);
+        const requesterId = req.user.id;
+        const role = req.user.role;
 
-        const id = req.params.id;
+        const isSelfUnregister = role === "PLAYER" && requesterId === id;
+        const isAdmin = role === "ADMIN";
+
+        if (!isSelfUnregister && !isAdmin) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
 
         try {
-            // Check if player exists
             const [rows] = await pool.query("SELECT * FROM players WHERE id = ?", [id]);
             if (rows.length === 0) {
                 return res.status(404).json({ error: "Player not found" });
             }
-
-            // Delete player
             await pool.query("DELETE FROM players WHERE id = ?", [id]);
-            res.json({ message: "Player removed" });
+            res.json({ message: "Player unregistered" });
         } catch (err) {
-            console.error(err);
+            console.error("[removePlayer] Error:", err);
             res.status(500).json({ error: "Failed to remove player" });
         }
     },
+
 
     async getAllPlayers(req, res) {
 
