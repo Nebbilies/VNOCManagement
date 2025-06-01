@@ -128,4 +128,19 @@ module.exports = {
             res.status(500).json({ success: false, message: "Failed to verify user" });
         }
     },
+
+    async logout(req, res) {
+        res.clearCookie("osu_token", {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+        });
+
+        // Option 1: redirect to frontend home (customize as needed)
+        //res.redirect("http://localhost:5173/");
+
+        // Option 2: alternatively, just send JSON:
+        //es.json({ message: "Logged out successfully" });
+    }
+
 };
