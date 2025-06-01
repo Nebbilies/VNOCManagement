@@ -15,7 +15,7 @@ const enter = {opacity: 1, x: 0, y: 0}
 const exit = {opacity: 0, x: 0}
 
 export default function MappoolContentCategory({style, index}: Props) {
-    let mappoolData = useContext(MappoolContext)
+    const { mappool: mappoolData } = useContext(MappoolContext);
     return (
         <motion.div key={style.name}
                     initial={hidden}
@@ -32,8 +32,8 @@ export default function MappoolContentCategory({style, index}: Props) {
                             <button className={'bg-gray-900/20 rounded-lg p-1'}>Expand</button>
                         </div>*/}
             </div>
-            <motion.div className={'mappool-content-map-container w-full flex mt-2 gap-4 justify-center px-4 mt-5'}>
-                <div className={'mappool-content-map-left-line w-[10px] h-auto rounded-full'}
+            <motion.div className={'mappool-content-map-container w-full flex mt-2 gap-4 justify-center px-1 lg:px-4 mt-5'}>
+                <div className={'mappool-content-map-left-line w-[10px] h-auto rounded-full hidden lg:flex'}
                      style={{backgroundColor: style.color}}/>
                 <div className={'mappool-content-map-data flex flex-col gap-4 w-full'}>
                     {Object.keys(mappoolData ?? {})?.map((mod) => {

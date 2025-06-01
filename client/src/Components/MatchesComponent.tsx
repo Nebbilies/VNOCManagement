@@ -25,14 +25,14 @@ const dummyMatchData: MatchData =
             time: '12:00',
             players: [
                 {
-                    "id": 10635981,
-                    "username": "- Nebby -",
-                    "globalRanking": 2903,
+                    "Id": 10635981,
+                    "Username": "- Nebby -",
+                    "Rank": 2903,
                 },
                 {
-                    "id": 7696512,
-                    "username": "Hoaq",
-                    "globalRanking": 2903,
+                    "Id": 7696512,
+                    "Username": "Hoaq",
+                    "Rank": 2903,
                 },
             ],
             player1Score: null,
@@ -47,14 +47,14 @@ const dummyMatchData: MatchData =
             time: '12:00',
             players: [
                 {
-                    "id": 12561202,
-                    "username": "TKieenaaaaaaaaaaaaaaaaa",
-                    "globalRanking": 29038,
+                    "Id": 12561202,
+                    "Username": "TKieenaaaaaaaaaaaaaaaaa",
+                    "Rank": 29038,
                 },
                 {
-                    "id": 14047619,
-                    "username": "Zeigler",
-                    "globalRanking": 831,
+                    "Id": 14047619,
+                    "Username": "Zeigler",
+                    "Rank": 831,
                 },
             ],
             player1Score: 3,
@@ -69,14 +69,14 @@ const dummyMatchData: MatchData =
             time: '12:00',
             players: [
                 {
-                    "id": 10635981,
-                    "username": "- Nebby -",
-                    "globalRanking": 2903,
+                    "Id": 10635981,
+                    "Username": "- Nebby -",
+                    "Rank": 2903,
                 },
                 {
-                    "id": 7696512,
-                    "username": "Hoaq",
-                    "globalRanking": 2903,
+                    "Id": 7696512,
+                    "Username": "Hoaq",
+                    "Rank": 2903,
                 },
             ],
             player1Score: null,
@@ -91,14 +91,14 @@ const dummyMatchData: MatchData =
             time: '12:00',
             players: [
                 {
-                    "id": 12561202,
-                    "username": "TKieen",
-                    "globalRanking": 29038,
+                    "Id": 12561202,
+                    "Username": "TKieen",
+                    "Rank": 29038,
                 },
                 {
-                    "id": 14047619,
-                    "username": "Zeigler",
-                    "globalRanking": 831,
+                    "Id": 14047619,
+                    "Username": "Zeigler",
+                    "Rank": 831,
                 },
             ],
             player1Score: 3,

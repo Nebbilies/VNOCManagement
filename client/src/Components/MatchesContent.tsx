@@ -28,7 +28,7 @@ function MatchesContent({matchesData}: Props) {
                         </div>
                         <div className={`match-card-info flex mt-0 bg-[#353d60] justify-between rounded-xl w-full items-center`}>
                             <div className={`match-card-player-1 w-3/10 flex rounded-xl bg-[#131724] ml-4 my-4 items-center`}>
-                                    <img alt="player avatar" src={`https://a.ppy.sh/${match.players[0].id}`}
+                                    <img alt="player avatar" src={`https://a.ppy.sh/${match.players[0].Id}`}
                                          className={"h-20 w-auto aspect-square rounded-xl hidden md:flex"}/>
                                 <div className={'player-1-info flex flex-col w-full py-1 px-2 text-start truncate inline overflow-hidden'}>
                                     <div className={'font-extrabold text-2xl lg:text-3xl inline'}>

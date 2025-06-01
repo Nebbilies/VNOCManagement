@@ -143,13 +143,13 @@ export function AddStaffButton({toggleRefresh}: Props) {
                                     <button
                                         type="button"
                                         onClick={closeModal}
-                                        className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} flex items-center justify-center`}
+                                        className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'} flex items-center justify-center`}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                                     >
                                         Confirm
                                     </button>

@@ -58,7 +58,7 @@ module.exports = {
         try {
             // Fetch beatmap data from osu! API
             const beatmap = await getBeatmapInfo(id, index);
-
+            console.log(beatmap);
             await pool.query(
                 `INSERT INTO map 
             (\`Round\`, \`Id\`, \`Mod\`, \`Index\`, BeatmapsetId, Name, Artist, Difficulty, Mapper, SR, BPM, Drain, CS, AR, OD)

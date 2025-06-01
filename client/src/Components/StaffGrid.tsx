@@ -105,13 +105,13 @@ function StaffGrid({staffList, toggleRefresh}: Props) {
                                             <button onClick={() =>
                                                 setDeleteStaff(0)
                                             }
-                                                    className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                                                    className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}>
                                                 Cancel
                                             </button>
                                             <button onClick={() => {
                                                 onDeleteStaff(staff.Id);
                                             }}
-                                                    className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                                                    className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}>
                                                 Delete
                                             </button>
                                         </div>

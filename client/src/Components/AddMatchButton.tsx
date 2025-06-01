@@ -170,7 +170,7 @@ export default function AddMatchButton() {
                                         </button>
                                         <button
                                             type="submit"
-                                            className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${dateTimeError ? 'cursor-not-allowed opacity-50' : ''}`}
+                                            className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${dateTimeError ? 'pointer-events-none opacity-50' : ''}`}
                                         >
                                             Confirm
                                         </button>

@@ -1,49 +1,9 @@
 import MappoolContent from "./MappoolContent.tsx";
-import {useEffect, useState} from "react";
+import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import {motion, AnimatePresence} from "motion/react";
 import {MappoolContext} from "../context/MappoolContext.tsx";
-import { Search } from "lucide-react";
-
-const mapsId: RawPoolData = {
-    "NM": [
-        {
-            "id": 1363001,
-            "idx": 4,
-        },
-        {
-            "id": 4977277,
-            "idx": 1,
-        },
-    ],
-    "HD": [
-        {
-            "id": 3621640,
-            "idx": 1,
-        },
-        {
-            "id": 1972244,
-            "idx": 2,
-        }
-    ],
-    "HR": [
-        {
-            "id": 1363001,
-            "idx": 1,
-        },
-    ],
-    "DT": [
-        {
-            "id": 4870736,
-            "idx": 1,
-        },
-    ],
-    "TB": [
-        {
-            "id": 4805696,
-            "idx": 1,
-        },
-    ],
-};
+import {Plus, Search} from "lucide-react";
+import {useToast} from "../context/ToastContext.tsx";
 
 interface PoolData {
     NM: MapData[],
@@ -51,6 +11,11 @@ interface PoolData {
     HR: MapData[],
     DT: MapData[],
     TB: MapData[],
+}
+
+//AllPoolData: object with all rounds as keys and PoolData as values
+export interface AllPoolData {
+    [round: string]: PoolData;
 }
 
 interface MapData {
@@ -82,6 +47,11 @@ interface RawPoolData {
     TB: RawMapData[],
 }
 
+interface RoundInfo {
+    Acronym: string,
+    Round: string,
+}
+
 type MapResponse = {
     id: number,
     artist: string,
@@ -99,27 +69,20 @@ type MapResponse = {
     }[]
 }
 
-async function fetchMappoolData(modMaps: RawMapData[]): Promise<MapData[]> {
-    return await Promise.all(modMaps.map(async ({ id, idx }) => {
-        const response = await fetch(`https://tryz.vercel.app/api/b/${id}`);
-        const json: MapResponse = await response.json();
-        const beatmapData = json.beatmaps.find((map) => map.id === id);
-        return {
-            id,
-            beatmapsetId: json.id,
-            artist: json.artist,
-            name: json.title,
-            difficulty: beatmapData!.version,
-            mapper: json.creator,
-            SR: beatmapData!.difficulty_rating,
-            BPM: beatmapData!.bpm,
-            CS: beatmapData!.cs,
-            AR: beatmapData!.ar,
-            OD: beatmapData!.accuracy,
-            drain: beatmapData!.hit_length,
-            idx: idx,
+function sortMapsByIndex(AllMappool: AllPoolData): AllPoolData {
+    const sortedMappool: AllPoolData = {};
+    for (const round in AllMappool) {
+        if (Object.prototype.hasOwnProperty.call(AllMappool, round)) {
+            sortedMappool[round] = {
+                NM: AllMappool[round].NM.sort((a, b) => a.idx - b.idx),
+                HD: AllMappool[round].HD.sort((a, b) => a.idx - b.idx),
+                HR: AllMappool[round].HR.sort((a, b) => a.idx - b.idx),
+                DT: AllMappool[round].DT.sort((a, b) => a.idx - b.idx),
+                TB: AllMappool[round].TB.sort((a, b) => a.idx - b.idx),
+            };
         }
-    }));
+    }
+    return sortedMappool;
 }
 
 export async function fetchBeatmapData(beatmapSearchId: number) {
@@ -146,13 +109,21 @@ export async function fetchBeatmapData(beatmapSearchId: number) {
     }
 }
 
-const AddBeatmapsButton = () => {
+interface AddBeatmapButtonProps {
+    toggleRefresh: (refresh: boolean) => void;
+    roundList: RoundInfo[];
+}
+
+const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [HoveringAddBeatmap, setHoveringAddBeatmap] = useState(false);
     const [beatmapId, setBeatmapId] = useState('');
-    const [mappoolName, setMappoolName] = useState('');
-    const [mod, setMod] = useState('');
+    const [roundName, setRoundName] = useState(roundList.length > 0 ? roundList[0].Acronym : '');
+    const [mod, setMod] = useState('NM');
     const [index, setIndex] = useState('');
     const [beatmapSearchId, setBeatmapSearchId] = useState(-1);
+    const {showSuccess, showError} = useToast();
+    const [loading, setLoading] = useState(false);
     const [beatmapSearchData, setBeatmapSearchData] = useState({
         returnCode: -1,
         id: -1,
@@ -171,64 +142,94 @@ const AddBeatmapsButton = () => {
         }
     }, [beatmapSearchId]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        /*try {
-            const response = await fetch('api/add-beatmaps', {
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:3001/api/maps/add', {
                 method: 'POST',
+                credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    beatmapId,
-                    mappoolName,
-                    slotName
+                    round: roundName,
+                    mod: mod,
+                    index: parseInt(index),
+                    id: parseInt(beatmapId),
                 }),
             });
 
             if (response.ok) {
-                console.log('Beatmap added successfully');
+                showSuccess('Beatmap added successfully!');
                 closeModal();
                 // Reset form
                 setBeatmapId('');
-                setMappoolName('');
-                setSlotName('');
+                setRoundName(roundList.length > 0 ? roundList[0].Acronym : '');
+                setMod('NM');
+                setIndex('');
+                setBeatmapSearchId(-1);
+                setBeatmapSearchData({
+                    returnCode: -1,
+                    id: -1,
+                    artist: '',
+                    title: '',
+                    difficulty: '',
+                });
+                toggleRefresh(true);
             } else {
                 console.error('Failed to add beatmap');
+                const errorData = await response.json();
+                showError(errorData.error || 'Failed to add beatmap');
             }
         } catch (error) {
             console.error('Error adding beatmap:', error);
-        }*/
+        }
+        setLoading(false);
     };
 
     return (
         <>
-            <button
-                onClick={openModal}
-                className="bg-green-500 text-2xl w-1/4 hover:bg-green-700 text-white font-bold py-2 px-4 mx-4 cursor-pointer rounded rounded-2xl transition-colors duration-300"
-            >
-                +
-            </button>
+            <div onMouseEnter={() => setHoveringAddBeatmap(true)}
+                 onMouseLeave={() => setHoveringAddBeatmap(false)}
+                 className="text-white font-bold w-[39px] h-1/2 cursor-pointer rounded-full transition-colors duration-300 flex justify-center items-center">
+                <Plus className={'h-full w-full'}
+                      onClick={openModal}
+                >
+                </Plus>
+                <AnimatePresence>
+                    {HoveringAddBeatmap && (
+                        <motion.div
+                            initial={{opacity: 0, y: -10}}
+                            animate={{opacity: 1, y: 0}}
+                            exit={{opacity: 0, y: -10}}
+                            transition={{type: "spring", damping: 25, stiffness: 300}}
+                            className="absolute text-white text-sm p-2 rounded-md mt-2 translate-y-[-150%] bg-gray-800 shadow-lg z-50"
+                        >
+                            Add Beatmap
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
 
             <AnimatePresence>
                 {isModalOpen && (
                     <>
                         {/* Overlay */}
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 0.6 }}
-                            exit={{ opacity: 0 }}
+                            initial={{opacity: 0}}
+                            animate={{opacity: 0.6}}
+                            exit={{opacity: 0}}
                             className="fixed inset-0 bg-gray-700 blur-l z-40"
                             onClick={closeModal}
                         />
 
                         {/* Modal */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            initial={{opacity: 0, scale: 0.9, y: 20}}
+                            animate={{opacity: 1, scale: 1, y: 0}}
+                            exit={{opacity: 0, scale: 0.9, y: 20}}
+                            transition={{type: "spring", damping: 25, stiffness: 300}}
                             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
                         >
                             <h2 className="text-xl font-semibold mb-4 text-white">Add Beatmap</h2>
@@ -247,11 +248,12 @@ const AddBeatmapsButton = () => {
                                             className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
                                             required
                                         />
-                                        <button className={'bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1'}
-                                        onClick = {() => setBeatmapSearchId(parseInt(beatmapId))}
+                                        <div
+                                            className={'bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1 cursor-pointer'}
+                                            onClick={() => setBeatmapSearchId(parseInt(beatmapId))}
                                         >
                                             <Search className={'w-8 h-8'}/>
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
                                 {/* Beatmap Search Result */
@@ -275,9 +277,10 @@ const AddBeatmapsButton = () => {
                                             backgroundImage: `url('https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg')`,
                                             backgroundBlendMode: 'overlay'
                                         }}>
-                                        <img className={`object-cover h-full w-auto sm:flex hidden rounded-r-3xl rounded-l-3xl`}
-                                             src={`https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg`}
-                                             alt={'bg'}/>
+                                        <img
+                                            className={`object-cover h-full w-auto sm:flex hidden rounded-r-3xl rounded-l-3xl`}
+                                            src={`https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg`}
+                                            alt={'bg'}/>
                                         <div
                                             className={`mappool-content-map-item-info flex flex-col w-7/12 h-full px-3 justify-start text-start overflow-hidden`}
                                         >
@@ -300,18 +303,21 @@ const AddBeatmapsButton = () => {
                                 {/* Mappool Name and Slot Name */}
                                 <div className="flex gap-4 mt-4 mb-6">
                                     <div className="w-1/2">
-                                        <label htmlFor="mappoolName"
+                                        <label htmlFor="roundName"
                                                className="block text-sm font-medium text-white mb-1">
-                                            Mappool Name
+                                            Round Acronym
                                         </label>
-                                        <input
-                                            type="text"
-                                            id="mappoolName"
-                                            value={mappoolName}
-                                            onChange={(e) => setMappoolName(e.target.value)}
-                                            className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
-                                            required
-                                        />
+                                        <select name={"roundName"} id={"roundName"}
+                                                className={"w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"}
+                                                value={roundName}
+                                                onChange={(e) => setRoundName(e.target.value)}
+                                        >
+                                            {roundList.map((round) => (
+                                                <option key={round.Acronym} value={round.Acronym}>
+                                                    {round.Round}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div className="w-1/4">
@@ -350,13 +356,13 @@ const AddBeatmapsButton = () => {
                                     <button
                                         type="button"
                                         onClick={closeModal}
-                                        className="text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors cursor-pointer"
+                                        className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${beatmapSearchData.returnCode === 200 ? 'cursor-pointer' : "cursor-not-allowed opacity-50"} `}
+                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${beatmapSearchData.returnCode === 200 && !loading ? 'cursor-pointer' : "pointer-events-none opacity-50"} `}
                                     >
                                         Confirm
                                     </button>
@@ -370,55 +376,88 @@ const AddBeatmapsButton = () => {
     );
 };
 
-async function fetchMods(mapsId: RawPoolData): Promise<PoolData> {
-    //don't mutate the props
-    let data: PoolData = {};
-    for (const mod of Object.keys(mapsId)) {
-        data[mod as keyof PoolData] = await fetchMappoolData(mapsId[mod as keyof PoolData]);
-    }
-    //Sort the data by idx
-    for (const mod of Object.keys(data)) {
-        data[mod as keyof PoolData].sort((a, b) => a.idx - b.idx);
-    }
-    return data;
-}
-
-
 
 function MappoolComponent() {
-    /*const mappool = [
-        {id: "2258243", name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", artist: "bbbbb", slotName: "NM1", difficulty: 'Map Difficulty', BPM: 120.5, drain: 180, CS: 4, AR: 9, OD: 10, SR: 6.5},
-        {id: "2223850", name: "ccccc", artist: "ddddd", slotName: "HD1", difficulty: 'Map Difficulty', BPM: 120.5, drain: 189, CS: 4, AR: 9, OD: 10, SR: 6.5},
-        {id: "2258243", name: "eeeee", artist: "fffff", slotName: "NM2", difficulty: 'Map Difficulty', BPM: 120.5, drain: 329, CS: 4, AR: 9, OD: 10, SR: 6.5},
-    ];*/
-    const [mappool, setMappool] = useState<PoolData>({DT: [], HD: [], HR: [], NM: [], TB: []});
+    const [roundList, setRoundList] = useState<RoundInfo[]>([]);
+    const [currentRound, setCurrentRound] = useState<string>('');
+    const [allMappool, setAllMappool] = useState<AllPoolData>({});
+    const [refresh, setRefresh] = useState<boolean>(false);
     useEffect(() => {
-        fetchMods(mapsId).then((data) => {
-            setMappool(data);
-        });
-    }, [mappool]);
-  return (
-    <div className={"mappool-container flex flex-col max-w-screen h-auto px-4 lg:px-8 " +
-        "mt-40 mb-20 pt-5 pb-10 md:mx-16 lg:mx-36 xl:mx-64 mx-4 self-center text-white bg-gray-900/20"}>
-        <div className={"mappool-header flex w-full text-5xl font-black items-center"} >
-            <div className={"mappool-header-text w-full italic text-start"}>
-                MAPPOOL
+        fetch(`http://localhost:3001/api/round`, {})
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to fetch round data");
+                return res.json();
+            })
+            .then((data: RoundInfo[]) => {
+                setRoundList(data);
+                if (data.length > 0) {
+                    setCurrentRound(data[0].Acronym); // Set the first round as the current round
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching round data:", error);
+            });
+    }, []);
+    useEffect(() => {
+        fetch(`http://localhost:3001/api/maps/all`, {})
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to fetch mappool data");
+                return res.json();
+            })
+            .then((data: AllPoolData) => {
+                setAllMappool(sortMapsByIndex(data));
+            })
+            .catch((error) => {
+                console.error("Error fetching mappool data:", error);
+            });
+        setRefresh(false);
+    }, [refresh]);
+
+    return (
+        <div className={"mappool-container flex flex-col max-w-screen h-auto px-4 lg:px-8 " +
+            "mt-40 mb-20 pt-5 pb-10 md:mx-10 lg:mx-36 xl:mx-64 self-center text-white bg-gray-900/20"}>
+            <div className={"mappool-header flex flex-col w-full text-5xl font-black gap-4 lg:gap-0"}>
+                <div className={"w-full italic flex lg:flex-row items-center justify-between"}>
+                    <div className={"mappool-header-text italic lg:text-start text-center"}>
+                        MAPPOOL
+                    </div>
+                    <AddBeatmapButton toggleRefresh={setRefresh} roundList={roundList}/>
+                </div>
+                <div
+                    className={"mappool-header-selection font-bold text-2xl justify-center items-center flex mt-4 gap-4"}>
+                    <div>
+                        <span className={"text-white"}>Round: </span>
+                    </div>
+                    <select name={"mappool-selection"} id={"mappool-selection"}
+                            className={"text-white text-center focus:ring-blue-500 bg-[#23263a] focus:border-blue-500 rounded-xl p-1"}
+                            value={currentRound}
+                            onChange={(e) => setCurrentRound(e.target.value)}
+                    >
+                        {
+                            roundList.map((round) => {
+                                return (
+                                    <option key={round.Acronym} value={round.Acronym}>
+                                        {round.Round}
+                                    </option>
+                                )
+                            })
+                        }
+                    </select>
+                </div>
+
+
             </div>
-            <AddBeatmapsButton />
-            <div className={"mappool-header-selection font-bold text-2xl"}>
-                <select name={"mappool-selection"} id={"mappool-selection"} className={"bg-gray-900/20 text-white text-center"}>
-                    <option value={"week1"}>Week 1</option>
-                    <option value={"week2"}>Week 2</option>
-                    <option value={"week3"}>Week 3</option>
-                    <option value={"week4"}>Week 4</option>
-                </select>
-            </div>
+            <MappoolContext.Provider
+                value={{
+                    mappool: allMappool[currentRound] || {NM: [], HD: [], HR: [], DT: [], TB: []},
+                    currentRound: currentRound,
+                    refresh,
+                    setRefresh
+                }}>
+                <MappoolContent/>
+            </MappoolContext.Provider>
         </div>
-        <MappoolContext.Provider value={mappool}>
-            <MappoolContent />
-        </MappoolContext.Provider>
-    </div>
-  );
+    );
 }
 
 export default MappoolComponent;

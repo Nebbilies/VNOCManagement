@@ -39,7 +39,7 @@ async function getBeatmapInfo(id, idx = null) {
         mapper: data.beatmapset.creator,
         SR: data.difficulty_rating,
         BPM: data.bpm,
-        drain: data.drain,
+        drain: data.total_length,
         CS: data.cs,
         AR: data.ar,
         OD: data.accuracy,
