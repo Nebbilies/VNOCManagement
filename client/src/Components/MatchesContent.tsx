@@ -32,10 +32,10 @@ function MatchesContent({matchesData}: Props) {
                                          className={"h-20 w-auto aspect-square rounded-xl hidden md:flex"}/>
                                 <div className={'player-1-info flex flex-col w-full py-1 px-2 text-start truncate inline overflow-hidden'}>
                                     <div className={'font-extrabold text-2xl lg:text-3xl inline'}>
-                                        {match.players[0].username}
+                                        {match.players[0].Username}
                                     </div>
                                     <h3 className={'lg:text-2xl text-lg font-bold text-start text-[#71747c]'}>
-                                        #{match.players[0].globalRanking}
+                                        #{match.players[0].Rank}
                                     </h3>
                                 </div>
                             </div>
@@ -62,18 +62,17 @@ function MatchesContent({matchesData}: Props) {
                                     className={'player-2-info flex flex-col w-full text-end py-1 px-2'}>
                                     <div
                                         className={"text-2xl lg:text-3xl font-bold truncate inline overflow-hidden"}>
-                                        {match.players[1].username}
+                                        {match.players[1].Username}
                                     </div>
                                     <h3 className={'lg:text-2xl text-lg font-bold text-[#71747c]'}>
-                                        #{match.players[1].globalRanking}
+                                        #{match.players[1].Rank}
                                     </h3>
                                 </div>
-                                <img alt="player avatar" src={`https://a.ppy.sh/${match.players[1].id}`}
+                                <img alt="player avatar" src={`https://a.ppy.sh/${match.players[1].Id}`}
                                      className={"h-20 w-auto aspect-square rounded-xl hidden md:flex"}/>
                             </div>
                         </div>
                     </motion.div>
-
                 ))}
             </div>
         </div>
