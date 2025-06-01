@@ -91,20 +91,65 @@ module.exports = {
     },
 
     async editMap(req, res) {
-        const { round, index, oldMod, newMod, newId } = req.body;
+        const {
+            oldRound,
+            oldMod,
+            oldIndex,
+            newId,
+            newMod,
+            newIndex
+        } = req.body;
 
         if (!["MAPPOOLER", "ADMIN"].includes(req.user.role)) {
             return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
         }
 
-        if (!round || !index || !oldMod || !newMod || !newId) {
+        if (!oldRound || !oldMod || oldIndex == null || !newId) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
+        const modToSet = newMod?.trim() || oldMod;
+        const indexToSet = newIndex !== undefined && newIndex !== "" ? newIndex : oldIndex;
+
         try {
+            const beatmap = await getBeatmapInfo(newId, indexToSet);
+
             const [result] = await pool.query(
-                "UPDATE map SET `Mod` = ?, `Id` = ? WHERE `Round` = ? AND `Index` = ? AND `Mod` = ?",
-                [newMod, newId, round, index, oldMod]
+                `UPDATE map SET 
+                Id = ?, 
+                \`Mod\` = ?, 
+                \`Index\` = ?, 
+                BeatmapsetId = ?, 
+                Name = ?, 
+                Artist = ?, 
+                Difficulty = ?, 
+                Mapper = ?, 
+                SR = ?, 
+                BPM = ?, 
+                Drain = ?, 
+                CS = ?, 
+                AR = ?, 
+                OD = ?
+            WHERE \`Round\` = ? AND \`Mod\` = ? AND \`Index\` = ?`,
+                [
+                    newId,
+                    modToSet,
+                    indexToSet,
+                    beatmap.beatmapsetId,
+                    beatmap.name,
+                    beatmap.artist,
+                    beatmap.difficulty,
+                    beatmap.mapper,
+                    beatmap.SR,
+                    beatmap.BPM,
+                    beatmap.drain,
+                    beatmap.CS,
+                    beatmap.AR,
+                    beatmap.OD,
+                    oldRound,
+                    oldMod,
+                    oldIndex
+                ]
             );
 
             if (result.affectedRows === 0) {
@@ -117,6 +162,7 @@ module.exports = {
             res.status(500).json({ error: "Failed to update beatmap" });
         }
     },
+
 
     async deleteMap(req, res) {
         const { round, index, mod } = req.body;
