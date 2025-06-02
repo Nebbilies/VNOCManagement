@@ -104,7 +104,7 @@ module.exports = {
             return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
         }
 
-        if (!oldRound || !oldMod || oldIndex == null || !newId) {
+        if (!oldRound || !oldMod || oldIndex == null) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
@@ -112,8 +112,50 @@ module.exports = {
         const indexToSet = newIndex !== undefined && newIndex !== "" ? newIndex : oldIndex;
 
         try {
-            const beatmap = await getBeatmapInfo(newId, indexToSet);
+            // Check if new slot is already occupied (not self)
+            const [conflictCheck] = await pool.query(
+                `SELECT * FROM map 
+             WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ? 
+             AND NOT (Round = ? AND \'Mod\' = ? AND \`Index\` = ?)`,
+                [oldRound, modToSet, indexToSet, oldRound, oldMod, oldIndex]
+            );
 
+            if (conflictCheck.length > 0) {
+                return res.status(409).json({
+                    error: `A map already exists at ${oldRound} ${modToSet}${indexToSet}`
+                });
+            }
+
+            // Get current map ID if newId is empty
+            let idToSet = newId;
+
+            if (!newId) {
+                const [existingRows] = await pool.query(
+                    "SELECT Id FROM map WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?",
+                    [oldRound, oldMod, oldIndex]
+                );
+
+                if (existingRows.length === 0) {
+                    return res.status(404).json({ error: "Original beatmap not found" });
+                }
+
+                idToSet = existingRows[0].Id;
+            }
+
+            // Fetch metadata if ID changed
+            let beatmap;
+            if (newId) {
+                beatmap = await getBeatmapInfo(idToSet, indexToSet);
+            } else {
+                // Reuse existing metadata from DB
+                const [existing] = await pool.query(
+                    "SELECT * FROM map WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?",
+                    [oldRound, oldMod, oldIndex]
+                );
+                beatmap = existing[0];
+            }
+
+            // Perform the update
             const [result] = await pool.query(
                 `UPDATE map SET 
                 Id = ?, 
@@ -130,19 +172,19 @@ module.exports = {
                 CS = ?, 
                 AR = ?, 
                 OD = ?
-            WHERE \`Round\` = ? AND \`Mod\` = ? AND \`Index\` = ?`,
+            WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?`,
                 [
-                    newId,
+                    idToSet,
                     modToSet,
                     indexToSet,
-                    beatmap.beatmapsetId,
-                    beatmap.name,
-                    beatmap.artist,
-                    beatmap.difficulty,
-                    beatmap.mapper,
+                    beatmap.BeatmapsetId,
+                    beatmap.Name,
+                    beatmap.Artist,
+                    beatmap.Difficulty,
+                    beatmap.Mapper,
                     beatmap.SR,
                     beatmap.BPM,
-                    beatmap.drain,
+                    beatmap.Drain,
                     beatmap.CS,
                     beatmap.AR,
                     beatmap.OD,
