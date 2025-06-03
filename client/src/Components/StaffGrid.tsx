@@ -55,7 +55,7 @@ function StaffGrid({staffList, toggleRefresh}: Props) {
                         onMouseLeave={() => setHoveredStaff(0)}
                         key={staff.Id}
                         className="player-card bg-[#131724] border-8 border-[#353d60] rounded-[12px] flex flex-col w-full relative">
-                        {hoveredStaff === staff.Id && (
+                        {hoveredStaff === staff.Id && staff.Role !== "ADMIN" && (
                             <button
                                 onClick={() =>
                                     setDeleteStaff(staff.Id)
