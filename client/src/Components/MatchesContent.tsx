@@ -1,23 +1,49 @@
-import {MatchData} from "./MatchesComponent.tsx";
+import {Match} from "./MatchesComponent.tsx";
 import {motion} from "motion/react";
 import horizontal_line from "../assets/horizontal_line.png";
 import RescheduleButton from "./RescheduleButton.tsx";
 import {EditMatchButton} from "./EditMatchButton.tsx";
 import {DeleteMatchButton} from "./DeleteMatchButton.tsx";
+import {Staff} from "./StaffComponent.tsx";
+import {StaffRole} from "./MatchesStaff.tsx";
 
 interface Props {
-    matchesData: MatchData
+    match: Match;
+    index: number;
+}
+
+type groupedStaff = {
+    COMMENTATOR: Staff[];
+    REFEREE: Staff[];
+    STREAMER: Staff[];
 }
 
 const hidden = {opacity: 0, x: 0, y: -30}
 const enter = {opacity: 1, x: 0, y: 0}
 const exit = {opacity: 0, x: 0, y: -30}
 
-function MatchesContent({matchesData}: Props) {
+function MatchesContent({match, index}: Props) {
+    const processStaffData = (staffArray: Staff[]) => {
+        const groupedStaff: groupedStaff = {
+            COMMENTATOR: [],
+            REFEREE: [],
+            STREAMER: []
+        };
+
+        staffArray.forEach(member => {
+            if (member.Role === "COMMENTATOR") {
+                groupedStaff.COMMENTATOR.push(member);
+            } else if (member.Role === "REFEREE") {
+                groupedStaff.REFEREE.push(member);
+            } else if (member.Role === "STREAMER") {
+                groupedStaff.STREAMER.push(member);
+            }
+        });
+
+        return groupedStaff;
+    };
+    const staffByRole = processStaffData(match.staff);
     return (
-        <div className={"matches-content flex flex-col w-full h-auto bg-gray-900/20 rounded-lg"}>
-            <div className={"matches-list flex flex-col w-full h-auto rounded-lg p-0 md:p-5"}>
-                {matchesData.map((match, index) => (
                     <motion.div key={match.id} className={"match-card flex flex-col items-center mb-12 h-auto"}
                                 initial={hidden}
                                 animate={enter}
@@ -26,7 +52,7 @@ function MatchesContent({matchesData}: Props) {
                         <div className={`match-card-id w-30 rounded-t-xl bg-[#b65959] text-black text-center align-middle px-1 py-0.7`}>
                             <span className={"text-md font-bold text-[#3d1515]"}>Match {match.id}</span>
                         </div>
-                        <div className={`match-card-info flex mt-0 bg-[#353d60] justify-between rounded-xl w-full items-center`}>
+                        <div className={`match-card-info flex mt-0 bg-[#353d60] justify-between rounded-t-xl w-full items-center`}>
                             <div className={`match-card-player-1 w-3/10 flex rounded-xl bg-[#131724] ml-4 my-4 items-center`}>
                                     <img alt="player avatar" src={`https://a.ppy.sh/${match.players[0].Id}`}
                                          className={"h-20 w-auto aspect-square rounded-xl hidden md:flex"}/>
@@ -72,10 +98,35 @@ function MatchesContent({matchesData}: Props) {
                                      className={"h-20 w-auto aspect-square rounded-xl hidden md:flex"}/>
                             </div>
                         </div>
+                        {/* Staff Section */}
+                        <div className="staff-section w-full bg-[#2a2f45] rounded-b-xl px-6 py-4">
+                            <div className="flex justify-center items-start gap-8 lg:gap-12">
+                                {/* Commentators */}
+                                {staffByRole.COMMENTATOR.length > 0 && (
+                                    <StaffRole
+                                        title="Commentators"
+                                        members={staffByRole.COMMENTATOR}
+                                    />
+                                )}
+
+                                {/* Referee */}
+                                {staffByRole.REFEREE.length > 0 && (
+                                    <StaffRole
+                                        title="Referee"
+                                        members={staffByRole.REFEREE}
+                                    />
+                                )}
+
+                                {/* Streamer */}
+                                {staffByRole.STREAMER.length > 0 && (
+                                    <StaffRole
+                                        title="Streamer"
+                                        members={staffByRole.STREAMER}
+                                    />
+                                )}
+                            </div>
+                        </div>
                     </motion.div>
-                ))}
-            </div>
-        </div>
     )
 }
 
