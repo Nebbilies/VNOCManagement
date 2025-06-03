@@ -91,119 +91,121 @@ module.exports = {
     },
 
     async editMap(req, res) {
-        const {
-            oldRound,
-            oldMod,
-            oldIndex,
-            newId,
-            newMod,
-            newIndex
-        } = req.body;
+        const { round, oldMod, oldIndex, newId, newMod, newIndex } = req.body;
 
         if (!["MAPPOOLER", "ADMIN"].includes(req.user.role)) {
-            return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+            return res.status(403).json({ error: "Forbidden" });
         }
 
-        if (!oldRound || !oldMod || oldIndex == null) {
-            return res.status(400).json({ error: "Missing required fields" });
+        // Validate required fields
+        if (!round || !oldMod || oldIndex == null || !newId || !newMod || newIndex == null) {
+            return res.status(400).json({ error: "All fields are required" });
         }
-
-        const modToSet = newMod?.trim() || oldMod;
-        const indexToSet = newIndex !== undefined && newIndex !== "" ? newIndex : oldIndex;
 
         try {
-            // Check if new slot is already occupied (not self)
-            const [conflictCheck] = await pool.query(
-                `SELECT * FROM map 
-             WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ? 
-             AND NOT (Round = ? AND \'Mod\' = ? AND \`Index\` = ?)`,
-                [oldRound, modToSet, indexToSet, oldRound, oldMod, oldIndex]
-            );
-
-            if (conflictCheck.length > 0) {
-                return res.status(409).json({
-                    error: `A map already exists at ${oldRound} ${modToSet}${indexToSet}`
-                });
-            }
-
-            // Get current map ID if newId is empty
-            let idToSet = newId;
-
-            if (!newId) {
-                const [existingRows] = await pool.query(
-                    "SELECT Id FROM map WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?",
-                    [oldRound, oldMod, oldIndex]
-                );
-
-                if (existingRows.length === 0) {
-                    return res.status(404).json({ error: "Original beatmap not found" });
-                }
-
-                idToSet = existingRows[0].Id;
-            }
-
-            // Fetch metadata if ID changed
-            let beatmap;
-            if (newId) {
-                beatmap = await getBeatmapInfo(idToSet, indexToSet);
-            } else {
-                // Reuse existing metadata from DB
+            if (oldMod === newMod && oldIndex == newIndex) {
+                // 🔁 Case 1: Update ID in the same slot
                 const [existing] = await pool.query(
                     "SELECT * FROM map WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?",
-                    [oldRound, oldMod, oldIndex]
+                    [round, oldMod, oldIndex]
                 );
-                beatmap = existing[0];
+
+                if (existing.length === 0) {
+                    return res.status(404).json({ error: "Original slot not found" });
+                }
+
+                const beatmap = await getBeatmapInfo(newId, newIndex);
+
+                await pool.query(
+                    `UPDATE map SET 
+                    Id = ?, 
+                    BeatmapsetId = ?, 
+                    Name = ?, 
+                    Artist = ?, 
+                    Difficulty = ?, 
+                    Mapper = ?, 
+                    SR = ?, 
+                    BPM = ?, 
+                    Drain = ?, 
+                    CS = ?, 
+                    AR = ?, 
+                    OD = ?
+                 WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?`,
+                    [
+                        newId,
+                        beatmap.beatmapsetId,
+                        beatmap.name,
+                        beatmap.artist,
+                        beatmap.difficulty,
+                        beatmap.mapper,
+                        beatmap.SR,
+                        beatmap.BPM,
+                        beatmap.drain,
+                        beatmap.CS,
+                        beatmap.AR,
+                        beatmap.OD,
+                        round,
+                        oldMod,
+                        oldIndex
+                    ]
+                );
+
+                return res.json({ message: "Beatmap updated successfully" });
+            } else {
+                // 🔁 Case 2: Move to new Mod/Index
+                const [conflict] = await pool.query(
+                    "SELECT * FROM map WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?",
+                    [round, newMod, newIndex]
+                );
+
+                if (conflict.length > 0) {
+                    return res.status(409).json({ error: "Target slot already occupied" });
+                }
+
+                // Delete old slot
+                const [delResult] = await pool.query(
+                    "DELETE FROM map WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?",
+                    [round, oldMod, oldIndex]
+                );
+
+                if (delResult.affectedRows === 0) {
+                    return res.status(404).json({ error: "Original slot not found" });
+                }
+
+                // Fetch metadata and insert new map
+                const beatmap = await getBeatmapInfo(newId, newIndex);
+
+                await pool.query(
+                    `INSERT INTO map 
+                    (Round, Id, \`Mod\`, \`Index\`, BeatmapsetId, Name, Artist, Difficulty, Mapper, SR, BPM, Drain, CS, AR, OD)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        round,
+                        newId,
+                        newMod,
+                        newIndex,
+                        beatmap.beatmapsetId,
+                        beatmap.name,
+                        beatmap.artist,
+                        beatmap.difficulty,
+                        beatmap.mapper,
+                        beatmap.SR,
+                        beatmap.BPM,
+                        beatmap.drain,
+                        beatmap.CS,
+                        beatmap.AR,
+                        beatmap.OD
+                    ]
+                );
+
+                return res.json({ message: "Beatmap moved and updated successfully" });
             }
-
-            // Perform the update
-            const [result] = await pool.query(
-                `UPDATE map SET 
-                Id = ?, 
-                \`Mod\` = ?, 
-                \`Index\` = ?, 
-                BeatmapsetId = ?, 
-                Name = ?, 
-                Artist = ?, 
-                Difficulty = ?, 
-                Mapper = ?, 
-                SR = ?, 
-                BPM = ?, 
-                Drain = ?, 
-                CS = ?, 
-                AR = ?, 
-                OD = ?
-            WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?`,
-                [
-                    idToSet,
-                    modToSet,
-                    indexToSet,
-                    beatmap.BeatmapsetId,
-                    beatmap.Name,
-                    beatmap.Artist,
-                    beatmap.Difficulty,
-                    beatmap.Mapper,
-                    beatmap.SR,
-                    beatmap.BPM,
-                    beatmap.Drain,
-                    beatmap.CS,
-                    beatmap.AR,
-                    beatmap.OD,
-                    oldRound,
-                    oldMod,
-                    oldIndex
-                ]
-            );
-
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ error: "Beatmap not found" });
-            }
-
-            res.json({ message: "Beatmap updated successfully" });
         } catch (err) {
             console.error("[editMap] Error:", err);
             res.status(500).json({ error: "Failed to update beatmap" });
         }
     },
+
 
 
     async deleteMap(req, res) {
