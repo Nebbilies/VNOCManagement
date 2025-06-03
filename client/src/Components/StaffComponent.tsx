@@ -39,7 +39,7 @@ function StaffComponent() {
     }, [refresh]);
     return (
         <div className={"mappool-container flex flex-col items-center max-w-screen h-auto px-4 lg:px-8 " +
-            "mt-40 mb-20 pt-10 pb-10 md:mx-16 lg:mx-36 xl:mx-64 mx-8 self-center text-white bg-gray-900/50 rounded-3xl"}>
+            "mt-20 lg:mt-40 mb-20 pt-10 pb-10 md:mx-16 lg:mx-36 xl:mx-64 mx-8 self-center text-white bg-gray-900/50 rounded-3xl"}>
             <div className={"flex w-full justify-between items-center h-20"}>
                 <h1 className={"lg:text-6xl text-5xl font-black"}>Staff</h1>
                 <AddStaffButton toggleRefresh={setRefresh} />

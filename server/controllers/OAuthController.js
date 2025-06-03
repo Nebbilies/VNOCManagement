@@ -137,10 +137,7 @@ module.exports = {
         });
 
         // Option 1: redirect to frontend home (customize as needed)
-        //res.redirect("http://localhost:5173/");
-
-        // Option 2: alternatively, just send JSON:
-        //es.json({ message: "Logged out successfully" });
+        res.redirect("http://localhost:5173/");
     }
 
 };
