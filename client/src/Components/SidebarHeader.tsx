@@ -1,8 +1,9 @@
 import { motion } from "motion/react";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from 'lucide-react';
+import {LogOut, Menu, X} from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
+import {handleLogOut} from "./Header.tsx";
 
 interface Props {
     links: Array<{ name: string, path: string }>;
@@ -10,53 +11,23 @@ interface Props {
 }
 
 
-function SidebarHeader({ links, logo }: Props) {
+function SidebarHeader({ links }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
     };
-    const [prevScrollPos, setPrevScrollPos] = useState(0);
-    const [visible, setVisible] = useState(true);
-    useEffect(() => {
-        const handleScroll = () => {
-            const currentScrollPos = window.scrollY;
-
-            setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
-            setPrevScrollPos(currentScrollPos);
-        };
-
-        window.addEventListener('scroll', handleScroll);
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, [prevScrollPos]);
     const user = JSON.parse(window.localStorage.getItem("user") || "null");
+
     return (
         <div className="lg:hidden">
-            {/* Mobile Header Bar */}
-            <div className={` ${visible ? '' : '-translate-y-18'} bg-[#1b1d20]/50 text-white fixed z-999 duration-500 h-16 font-bold lg:text-xl left-0 top-0 text-md items-center justify-between w-screen border-violet-300 border-b-2 flex px-4 md:px-48 lg:px-64 shadow-violet-400/20 shadow-md`}>
-                {/* Empty div to balance the layout */}
-                <div className="w-10"></div>
-
-                {/* Centered logo */}
-                <a href="/" className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
-                    <div className="w-10 h-auto">
-                        <img src={logo} alt="logo" className="h-full aspect-auto" />
-                    </div>
-                </a>
-
-                {/* Menu button at the end */}
                 <button
                     onClick={toggleSidebar}
-                    className="p-2 focus:outline-none"
+                    className="p-2 focus:outline-none fixed top-4 right-4 z-999 bg-[#1b1d20] text-white rounded-full shadow-lg"
                     aria-label={isOpen ? "Close menu" : "Open menu"}
                 >
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
-            </div>
 
-            {/* Sidebar Overlay */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -69,7 +40,6 @@ function SidebarHeader({ links, logo }: Props) {
                 )}
             </AnimatePresence>
 
-            {/* Sidebar Content */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -111,7 +81,7 @@ function SidebarHeader({ links, logo }: Props) {
                             </ul>
 
                             <motion.div
-                                className="mt-8 py-2"
+                                className="mt-3 py-2"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.3 }}
@@ -126,15 +96,25 @@ function SidebarHeader({ links, logo }: Props) {
                                         Login
                                     </Link>
                                 ) : (
-                                    <div className="flex items-center gap-2">
-                                        {user.avatar_url ? (
-                                            <img
-                                                src={user.avatar_url}
-                                                alt="avatar"
-                                                className="rounded-full w-6 h-6 border border-white"
-                                            />
-                                        ) : null}
-                                        <span className={'text-lg'}>{user.username}</span>
+                                    <div className="flex items-center justify-between w-full">
+                                        <div className={'flex items-center gap-2'}>
+                                            {user.avatar_url ? (
+                                                <img
+                                                    src={user.avatar_url}
+                                                    alt="avatar"
+                                                    className="rounded-full w-6 h-6 border border-white"
+                                                />
+                                            ) : null}
+                                            <span className={'text-lg'}>{user.username}</span>
+                                        </div>
+                                        <motion.div
+                                            className={''}
+                                            whileHover={{scale: 1.1}}
+                                            whileTap={{scale: 0.9}}
+                                            transition={{type: "spring", stiffness: 300, duration: 200}}
+                                            onClick={handleLogOut}>
+                                            <LogOut className={'cursor-pointer w-6 h-6 ml-3'}/>
+                                        </motion.div>
                                     </div>
                                 )}
                             </motion.div>

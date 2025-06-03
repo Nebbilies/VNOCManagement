@@ -162,7 +162,7 @@ const matchesData: MatchData =
 function MatchesComponent() {
     return (
         <div className={"matches-container flex flex-col max-w-screen h-auto lg:px-8 " +
-            "mt-40 mb-20 pt-5 pb-10 md:mx-10 lg:mx-20 xl:mx-64 mx-2 self-center text-white bg-gray-900/20"}>
+            "mt-20 lg:mt-40mb-20 pt-5 pb-10 md:mx-10 lg:mx-20 xl:mx-64 mx-2 self-center text-white bg-gray-900/20"}>
             <div className={"matches-header flex items-center justify-between mb-5 h-20"}>
                 <h1 className={"lg:text-6xl font-black text-5xl"}>Matches</h1>
                 <div className={'controller-buttons flex items-center gap-4 h-full'}>

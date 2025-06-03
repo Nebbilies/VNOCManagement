@@ -9,6 +9,7 @@ import Header from "./Components/Header.tsx";
 import {ToastProvider} from "./context/ToastContext.tsx";
 
 function App() {
+    document.title = "Vietnam osu! Championship";
   return (
       <>
           <ToastProvider>

@@ -5,12 +5,18 @@ import {useEffect} from "react";
 import {useUser} from "../context/UserContext.tsx";
 
 const links = [
+    {name: "Home", path: "/"},
     {name: "Staff", path: "/staff"},
     {name: "Info", path: "/info"},
     {name: "Players", path: "/players"},
     {name: "Mappool", path: "/mappool"},
     {name: "Matches", path: "/matches"},
 ]
+
+export const handleLogOut = () => {
+    window.localStorage.removeItem("user");
+    window.location.href = "http://localhost:3001/api/auth/logout";
+}
 
 function Header() {
     const { setUser } = useUser()
