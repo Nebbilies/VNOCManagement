@@ -1,9 +1,10 @@
 import MappoolContent from "./MappoolContent.tsx";
-import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {motion, AnimatePresence} from "motion/react";
 import {MappoolContext} from "../context/MappoolContext.tsx";
 import {Plus, Search} from "lucide-react";
 import {useToast} from "../context/ToastContext.tsx";
+import { fetchRounds, fetchMappool } from "../lib/fetchFunctions.tsx";
 
 interface PoolData {
     NM: MapData[],
@@ -34,20 +35,7 @@ interface MapData {
     idx: number,
 }
 
-interface RawMapData {
-    id: number,
-    idx: number,
-}
-
-interface RawPoolData {
-    NM: RawMapData[],
-    HD: RawMapData[],
-    HR: RawMapData[],
-    DT: RawMapData[],
-    TB: RawMapData[],
-}
-
-interface RoundInfo {
+export interface RoundInfo {
     Acronym: string,
     Round: string,
 }
@@ -124,6 +112,7 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
     const [beatmapSearchId, setBeatmapSearchId] = useState(-1);
     const {showSuccess, showError} = useToast();
     const [loading, setLoading] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
     const [beatmapSearchData, setBeatmapSearchData] = useState({
         returnCode: -1,
         id: -1,
@@ -136,8 +125,10 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
 
     useEffect(() => {
         if (beatmapSearchId !== -1) {
+            setSearchLoading(true);
             fetchBeatmapData(beatmapSearchId).then((data) => {
                 setBeatmapSearchData(data);
+                setSearchLoading(false);
             });
         }
     }, [beatmapSearchId]);
@@ -252,7 +243,23 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
                                             className={'bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1 cursor-pointer'}
                                             onClick={() => setBeatmapSearchId(parseInt(beatmapId))}
                                         >
-                                            <Search className={'w-8 h-8'}/>
+                                            {searchLoading ? (
+                                                //Loading Spinner
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
+                                                     viewBox="0 0 24 24">
+                                                    <path fill="currentColor"
+                                                          d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z"
+                                                          opacity="0.5"/>
+                                                    <path fill="currentColor"
+                                                          d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z">
+                                                        <animateTransform attributeName="transform" dur="1s"
+                                                                          from="0 12 12" repeatCount="indefinite"
+                                                                          to="360 12 12" type="rotate"/>
+                                                    </path>
+                                                </svg>
+                                            ) : (
+                                                <Search className={'w-[30px] w-[30px]'}/>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -271,6 +278,10 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
                                     </div>
                                 ) : null}
                                 {beatmapSearchData.returnCode === 200 ? (
+                                    <>
+                                    <div className={'text-xl text-white font-bold mb-4 mt-2'}>
+                                        Submitting Beatmap:
+                                    </div>
                                     <div
                                         className={`mappool-content-map-item flex w-full rounded-3xl text-black h-20 font-bold items-center bg-center bg-cover bg-white/70 sm:bg-white/90 border-2 border-white `}
                                         style={{
@@ -298,6 +309,7 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
                                             </div>
                                         </div>
                                     </div>
+                                    </>
                                 ) : null}
 
                                 {/* Mappool Name and Slot Name */}
@@ -343,6 +355,8 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
                                         </label>
                                         <input
                                             id="index"
+                                            min="1"
+                                            max="9"
                                             value={index}
                                             type="number"
                                             onChange={(e) => setIndex(e.target.value)}
@@ -383,39 +397,48 @@ function MappoolComponent() {
     const [allMappool, setAllMappool] = useState<AllPoolData>({});
     const [refresh, setRefresh] = useState<boolean>(false);
     useEffect(() => {
-        fetch(`http://localhost:3001/api/round`, {})
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to fetch round data");
-                return res.json();
-            })
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+        fetchRounds(signal)
             .then((data: RoundInfo[]) => {
                 setRoundList(data);
-                if (data.length > 0) {
-                    setCurrentRound(data[0].Acronym); // Set the first round as the current round
+                setCurrentRound(data[0].Acronym);
+            })
+            .catch((error: Error) => {
+                if (error.name !== 'AbortError') {
+                    console.error('Error fetching mappool:', error);
                 }
             })
-            .catch((error) => {
-                console.error("Error fetching round data:", error);
-            });
+        return () => {
+            abortController.abort();
+        }
     }, []);
     useEffect(() => {
-        fetch(`http://localhost:3001/api/maps/all`, {})
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to fetch mappool data");
-                return res.json();
-            })
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+        fetchMappool(signal)
             .then((data: AllPoolData) => {
                 setAllMappool(sortMapsByIndex(data));
             })
-            .catch((error) => {
-                console.error("Error fetching mappool data:", error);
-            });
-        setRefresh(false);
+            .catch((error: Error) => {
+                if (error.name !== 'AbortError') {
+                    console.error('Error fetching mappool:', error);
+                }
+            })
+            .finally(() => {
+                setRefresh(false);
+            })
+        return () => {
+            abortController.abort();
+            setAllMappool({});
+            setCurrentRound('');
+            setRoundList([]);
+        }
     }, [refresh]);
 
     return (
         <div className={"mappool-container flex flex-col max-w-screen h-auto px-4 lg:px-8 " +
-            "mt-40 mb-20 pt-5 pb-10 md:mx-10 lg:mx-36 xl:mx-64 self-center text-white bg-gray-900/20"}>
+            "mt-20 lg:mt-40 mb-20 pt-5 pb-10 md:mx-10 lg:mx-36 xl:mx-64 self-center text-white bg-gray-900/20"}>
             <div className={"mappool-header flex flex-col w-full text-5xl font-black gap-4 lg:gap-0"}>
                 <div className={"w-full italic flex lg:flex-row items-center justify-between"}>
                     <div className={"mappool-header-text italic lg:text-start text-center"}>

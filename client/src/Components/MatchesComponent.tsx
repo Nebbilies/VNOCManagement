@@ -1,14 +1,19 @@
-import {PlayerData} from "./PlayersComponent.tsx";
+import {Player, PlayerData} from "./PlayersComponent.tsx";
+import {RoundInfo} from "./MappoolComponent.tsx";
 import MatchesContent from "./MatchesContent.tsx";
+import  {MatchesContext} from "../context/MatchesContext.tsx";
 import AddMatchButton from "./AddMatchButton.tsx";
 import {ManageMatchButton} from "./ManageMatchButton.tsx";
 import {Staff} from "./StaffComponent.tsx";
+import {useState, useEffect} from "react";
+import {Loading} from "./Loading.tsx";
+import {fetchMatches, fetchPlayers, fetchRounds} from "../lib/fetchFunctions.tsx"
 
 export interface Match {
     id: string;
-    date: string;
-    time: string
-    players: PlayerData;
+    time: string;
+    player1: Player;
+    player2: Player;
     player1Score: number | null;
     player2Score: number | null;
     matchLink: string | null;
@@ -17,166 +22,132 @@ export interface Match {
     round: string;
 }
 
+export interface ReactSelectOptions {
+    readonly value: number;
+    readonly label: string;
+}
+
 export type MatchData = Match[]
 
-const matchesData: MatchData =
-    [
-        {
-            id: "1",
-            date: '2025-12-12',
-            time: '12:00',
-            players: [
-                {
-                    "Id": 10635981,
-                    "Username": "- Nebby -",
-                    "Rank": 2903,
-                },
-                {
-                    "Id": 7696512,
-                    "Username": "Hoaq",
-                    "Rank": 2903,
-                },
-            ],
-            staff: [
-                {
-                    "Id": 12345678,
-                    "Username": "Referee1",
-                    "Role": "REFEREE",
-                },
-                {
-                    "Id": 87654321,
-                    "Username": "Commentator1",
-                    "Role": "COMMENTATOR",
-                },
-            ],
-            player1Score: null,
-            player2Score: null,
-            matchLink: null,
-            status: "SCHEDULED",
-            round: "Round of 16",
-        },
-        {
-            id: "2",
-            date: '2025-12-12',
-            time: '12:00',
-            players: [
-                {
-                    "Id": 12561202,
-                    "Username": "TKieenaaaaaaaaaaaaaaaaa",
-                    "Rank": 29038,
-                },
-                {
-                    "Id": 14047619,
-                    "Username": "Zeigler",
-                    "Rank": 831,
-                },
-            ],
-            staff: [
-                {
-                    "Id": 12345678,
-                    "Username": "Referee2",
-                    "Role": "REFEREE",
-                },
-                {
-                    "Id": 87654321,
-                    "Username": "Commentator2",
-                    "Role": "COMMENTATOR",
-                },
-                {
-                    "Id": 11223344,
-                    "Username": "Commentator3",
-                    "Role": "COMMENTATOR",
-                },
-                {
-                    "Id": 99887766,
-                    "Username": "Streamer1",
-                    "Role": "STREAMER",
-                }
-            ],
-            player1Score: 3,
-            player2Score: 5,
-            matchLink: null,
-            status: "FINISHED",
-            round: "Round of 16",
-        },
-        {
-            id: "3",
-            date: '2025-12-12',
-            time: '12:00',
-            players: [
-                {
-                    "Id": 10635981,
-                    "Username": "- Nebby -",
-                    "Rank": 2903,
-                },
-                {
-                    "Id": 7696512,
-                    "Username": "Hoaq",
-                    "Rank": 2903,
-                },
-            ],
-            staff: [],
-            player1Score: null,
-            player2Score: null,
-            matchLink: null,
-            status: "SCHEDULED",
-            round: "Round of 16",
-        },
-        {
-            id: "4",
-            date: '2025-12-12',
-            time: '12:00',
-            players: [
-                {
-                    "Id": 12561202,
-                    "Username": "TKieen",
-                    "Rank": 29038,
-                },
-                {
-                    "Id": 14047619,
-                    "Username": "Zeigler",
-                    "Rank": 831,
-                },
-            ],
-            staff: [
-                {
-                    "Id": 11223344,
-                    "Username": "Commentator3",
-                    "Role": "COMMENTATOR",
-                },
-                {
-                    "Id": 99887766,
-                    "Username": "Streamer1",
-                    "Role": "STREAMER",
-                }
-            ],
-            player1Score: 3,
-            player2Score: 5,
-            matchLink: null,
-            status: "FINISHED",
-            round: "Round of 16",
-        }
-    ]
-
+const sortMatchesByTime = (matches: MatchData): MatchData => {
+    return matches.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+}
 
 function MatchesComponent() {
+    const [matchData, setMatchData] = useState<MatchData>([])
+    const [fetchingData, setFetchingData] = useState<boolean>(true)
+    const [refresh, setRefresh] = useState<boolean>(false);
+    const [playerOptions, setPlayerOptions] = useState<ReactSelectOptions[]>([]);
+    const [roundsList, setRoundsList] = useState<RoundInfo[]>([]);
+    const [currentRound, setCurrentRound] = useState<string>("");
+    const [filteredMatches, setFilteredMatches] = useState<MatchData>([]);
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+        setFetchingData(true);
+        fetchMatches(signal)
+            .then((data: MatchData) => {
+                setMatchData(sortMatchesByTime(data));
+            })
+            .finally(() => {
+                setFetchingData(false);
+                setRefresh(false);
+            })
+        fetchPlayers(signal)
+            .then((data: PlayerData) => {
+                const options: ReactSelectOptions[] = data.map((player: Player) => ({
+                    value: player.Id,
+                    label: player.Username
+                }));
+                setPlayerOptions(options);
+            })
+            .catch((error) => {
+                console.error("Error fetching players:", error);
+            });
+        fetchRounds(signal)
+            .then((data: RoundInfo[]) => {
+                setRoundsList(data);
+                if (data.length > 0) {
+                    setCurrentRound(data[0].Acronym);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching rounds:", error);
+            });
+        return () => {
+            abortController.abort();
+            setMatchData([]);
+            setFetchingData(false);
+            setRefresh(false);
+        };
+    }, [refresh]);
+
+    useEffect(() => {
+        // Filter matches based on the current round
+        if (currentRound) {
+            const filtered = matchData.filter((match) => match.round === currentRound);
+            setFilteredMatches(filtered);
+        } else {
+            setFilteredMatches(matchData);
+        }
+    }, [currentRound, matchData]);
+    // Default round option
+    const matchIds: string[] = matchData.map((match) => match.id);
     return (
         <div className={"matches-container flex flex-col max-w-screen h-auto lg:px-8 " +
-            "mt-20 lg:mt-40mb-20 pt-5 pb-10 md:mx-10 lg:mx-20 xl:mx-64 mx-2 self-center text-white bg-gray-900/20"}>
-            <div className={"matches-header flex items-center justify-between mb-5 h-20"}>
+            "mt-20 lg:mt-40 mb-20 pt-5 pb-10 md:mx-10 lg:mx-20 xl:mx-64 mx-2 self-center text-white bg-gray-900/20"}>
+            <div className={"matches-header flex items-center justify-between h-20"}>
                 <h1 className={"lg:text-6xl font-black text-5xl"}>Matches</h1>
                 <div className={'controller-buttons flex items-center gap-4 h-full'}>
-                    <AddMatchButton/>
+                    <AddMatchButton setRefresh={setRefresh} playerOptions={playerOptions} roundsList={roundsList} matchIds={matchIds}/>
                     <ManageMatchButton/>
                 </div>
             </div>
-            <div className={"matches-content flex flex-col w-full h-auto bg-gray-900/20 rounded-lg"}>
-                <div className={"matches-list flex flex-col w-full h-auto rounded-lg p-0 md:p-5"}>
-                    {matchesData.map((match, index) => (
-                        <MatchesContent match={match} index={index}/>
-                    ))}
-                </div>
-            </div>
+            { fetchingData ? (
+                <Loading/>
+            ) : (
+                <>
+                    <div
+                        className={"font-bold text-2xl justify-center items-center flex mt-2 gap-4"}>
+                        <div>
+                            <span className={"text-white"}>Round: </span>
+                        </div>
+                        <select name={"round-selection"} id={"round-selection"}
+                                className={"text-white text-center focus:ring-blue-500 bg-[#23263a] focus:border-blue-500 rounded-xl p-1"}
+                                value={currentRound}
+                                onChange={(e) => setCurrentRound(e.target.value)}
+                        >
+                            {
+                                roundsList.map((round) => {
+                                    return (
+                                        <option key={round.Acronym} value={round.Acronym}>
+                                            {round.Round}
+                                        </option>
+                                    )
+                                })
+                            }
+                        </select>
+                    </div>
+                    <div className={"matches-content flex flex-col w-full h-auto bg-gray-900/20 rounded-lg mt-4"}>
+                        <div className={"matches-list flex flex-col w-full h-auto rounded-lg p-0 md:p-5"}>
+                            {filteredMatches.length > 0 ? (
+                                <MatchesContext.Provider value={{playerOptions, roundsList, setRefresh}}>
+                                    {filteredMatches.map((match, index) => (
+                                        <MatchesContent index={index} match={match}/>
+                                    ))}
+                                </MatchesContext.Provider>
+                            ) : (
+                                <div className={"flex items-center justify-center h-64"}>
+                                    <h2 className={"text-2xl font-bold text-gray-400"}>No matches found</h2>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+
+            )
+            }
+
         </div>
 
     )

@@ -20,6 +20,12 @@ export default function MappoolContentCard({map, style, mod}: Props) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [beatmapSearchId, setBeatmapSearchId] = useState(-1);
     const { showSuccess, showError } = useToast();
+    const [ newMapData, setNewMapData ] = useState({
+        id: 0,
+        mod: "NM",
+        idx: 0,
+    })
+    const [ searchLoading, setSearchLoading ] = useState<boolean>(false);
     const [beatmapSearchData, setBeatmapSearchData] = useState({
         returnCode: -1,
         id: -1,
@@ -30,7 +36,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
     const [editingMapData, setEditingMapData] = useState(
         {
             id: 0,
-            mod: "",
+            mod: "NM",
             idx: 0,
         }
     );
@@ -61,6 +67,49 @@ export default function MappoolContentCard({map, style, mod}: Props) {
         setLoading(false);
         setRefresh(true);
     }
+    async function editBeatmap({oldRound, oldMod, oldIndex}: { oldRound: string, oldMod: string, oldIndex: number }) {
+        setLoading(true);
+        console.log('all editing map data:',
+            'round:', oldRound,
+            'oldMod:', oldMod,
+            'oldIndex:', oldIndex,
+            'newMod:', newMapData.mod,
+            'newIndex:', newMapData.idx,
+            'newId:', beatmapSearchId
+            )
+
+        const response = await fetch(`http://localhost:3001/api/maps/edit`, {
+            credentials: 'include',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "round": oldRound,
+                "oldMod": oldMod,
+                "oldIndex": oldIndex,
+                "newMod": newMapData.mod,
+                "newIndex": newMapData.idx,
+                "newId": beatmapSearchId,
+            }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            showError(errorData.error || 'Failed to edit beatmap');
+            setLoading(false);
+            throw new Error('Failed to edit beatmap');
+        }
+        setIsDeleteModalOpen(false);
+        showSuccess('Beatmap edited successfully!');
+        setLoading(false);
+        setRefresh(true);
+        setEditingMapData({
+            id: 0,
+            mod: "NM",
+            idx: 0,
+        });
+        setBeatmapSearchId(-1);
+    }
     // Close menu on outside click
     useEffect(() => {
         function handleClickOutside(event) {
@@ -77,14 +126,12 @@ export default function MappoolContentCard({map, style, mod}: Props) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [menuOpen]);
 
-    function handleSubmit(e) {
-        e.preventDefault()
-    }
-
     useEffect(() => {
         if (beatmapSearchId !== -1) {
+            setSearchLoading(true);
             fetchBeatmapData(beatmapSearchId).then((data) => {
                 setBeatmapSearchData(data);
+                setSearchLoading(false);
             });
         }
     }, [beatmapSearchId]);
@@ -195,7 +242,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                         exit={{height: 0, transition: {delay: 0.2}}}
                         transition={{ease: 'easeInOut'}}
                         ref={menuRef}
-                        className="absolute left-3 top-full mt-2 z-50 bg-[#0e111a] rounded-lg shadow-lg w-35 flex flex-col animate-fade-in"
+                        className="absolute -left-15 top-full mt-2 z-50 bg-[#0e111a] rounded-lg shadow-lg w-35 flex flex-col animate-fade-in"
                     >
                         <motion.button
                             initial={{opacity: 0}}
@@ -210,7 +257,12 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                     mod: mod,
                                     idx: map.idx,
                                 })
-                                setBeatmapSearchId(map.id)
+                                setBeatmapSearchId(map.id);
+                                setNewMapData({
+                                    id: map.id,
+                                    mod: mod,
+                                    idx: map.idx,
+                                })
                             }}
                         >
                             Edit
@@ -249,7 +301,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                             onClick={() => {
                                 setEditingMapData({
                                     id: 0,
-                                    mod: "",
+                                    mod: "NM",
                                     idx: 0,
                                 })
                             }}
@@ -264,7 +316,14 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
                         >
                             <h2 className="text-xl font-semibold mb-4 text-white">Add Beatmap</h2>
-                            <form onSubmit={handleSubmit}>
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                editBeatmap({
+                                    oldRound: currentRound,
+                                    oldMod: editingMapData.mod,
+                                    oldIndex: editingMapData.idx
+                                })
+                            }}>
                                 <div className="mb-4">
                                     <label htmlFor="beatmapId" className="block text-sm font-medium text-white mb-1">
                                         Beatmap ID
@@ -273,21 +332,41 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                         <input
                                             type="number"
                                             id="beatmapId"
-                                            value={editingMapData.id}
-                                            onChange={(e) => setEditingMapData(
-                                                (prev) => ({...prev, id: parseInt(e.target.value)})
-                                            )}
+                                            value={newMapData.id}
+                                            onChange={(e) => {
+                                                setNewMapData((prev => ({
+                                                    ...prev,
+                                                    id: parseInt(e.target.value)
+                                                })));
+                                            }
+                                        }
                                             className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
                                             required
                                         />
-                                        <button
-                                            className={'bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1'}
+                                        <div
+                                            className={`bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1 ${searchLoading ? 'pointer-event-none opacity-50' : 'cursor-pointer'}`}
                                             onClick={() => {
-                                                setBeatmapSearchId(editingMapData.id)
+                                                setBeatmapSearchId(newMapData.id);
                                             }}
                                         >
-                                            <Search className={'w-8 h-8'}/>
-                                        </button>
+                                            {searchLoading ? (
+                                                //Loading Spinner
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
+                                                     viewBox="0 0 24 24">
+                                                    <path fill="currentColor"
+                                                          d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z"
+                                                          opacity="0.5"/>
+                                                    <path fill="currentColor"
+                                                          d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z">
+                                                        <animateTransform attributeName="transform" dur="1s"
+                                                                          from="0 12 12" repeatCount="indefinite"
+                                                                          to="360 12 12" type="rotate"/>
+                                                    </path>
+                                                </svg>
+                                            ) : (
+                                                <Search className={'w-[30px] w-[30px]'}/>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 {/* Beatmap Search Result */
@@ -305,6 +384,10 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                     </div>
                                 ) : null}
                                 {beatmapSearchData.returnCode === 200 ? (
+                                    <>
+                                        <div className={'w-full text-white text-lg font-bold mb-2 mt-4'}>
+                                            Submitting beatmap:
+                                        </div>
                                     <div
                                         className={`mappool-content-map-item flex w-full rounded-3xl text-black h-20 font-bold items-center bg-center bg-cover bg-white/70 sm:bg-white/90 border-2 border-white `}
                                         style={{
@@ -332,6 +415,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                             </div>
                                         </div>
                                     </div>
+                    </>
                                 ) : null}
 
                                 {/* Mappool Name and Slot Name */}
@@ -340,16 +424,20 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                         <label htmlFor="mod" className="block text-sm font-medium text-white mb-1">
                                             Mod
                                         </label>
-                                        <input
-                                            type="text"
+                                        <select
                                             id="mod"
-                                            value={editingMapData.mod}
-                                            onChange={(e) => setEditingMapData(
+                                            value={newMapData.mod}
+                                            onChange={(e) => setNewMapData(
                                                 (prev) => ({...prev, mod: e.target.value})
                                             )}
-                                            className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
-                                            required
-                                        />
+                                            className="w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"
+                                            required>
+                                            <option value="NM">NM</option>
+                                            <option value="HD">HD</option>
+                                            <option value="HR">HR</option>
+                                            <option value="DT">DT</option>
+                                            <option value="TB">TB</option>
+                                        </select>
                                     </div>
                                     <div className="w-1/2">
                                         <label htmlFor="slotName" className="block text-sm font-medium text-white mb-1">
@@ -357,9 +445,11 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                         </label>
                                         <input
                                             type="number"
+                                            min="1"
+                                            max="9"
                                             id="slotName"
-                                            value={editingMapData.idx}
-                                            onChange={(e) => setEditingMapData(
+                                            value={newMapData.idx}
+                                            onChange={(e) => setNewMapData(
                                                 (prev) => ({...prev, idx: parseInt(e.target.value)})
                                             )}
                                             className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
@@ -374,17 +464,17 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                         onClick={() => {
                                             setEditingMapData({
                                                 id: 0,
-                                                mod: "",
+                                                mod: "NM",
                                                 idx: 0,
                                             })
                                         }}
-                                        className="text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors cursor-pointer"
+                                        className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'pointer-event-none opacity-50' : 'cursor-pointer'}`}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${beatmapSearchData.returnCode === 200 ? 'cursor-pointer' : "cursor-not-allowed opacity-50"} `}
+                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${beatmapSearchData.returnCode === 200 && !loading ? 'cursor-pointer' : "pointer-event-none opacity-50"} `}
                                     >
                                         Confirm
                                     </button>
@@ -415,16 +505,14 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                 Are you sure you want to delete this map?
                             </div>
                             <div className="flex gap-3 w-full h-12">
-                                <button
-                                    type="button"
+                                <div
                                     onClick={() => setIsDeleteModalOpen(false)}
-                                    className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                                    className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 flex items-center font-bold ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                                 >
                                     Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                                </div>
+                                <div
+                                    className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 flex items-center font-bold ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                                     onClick={() => {
                                         // Handle delete logic here
                                         deleteBeatmap({
@@ -435,7 +523,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                                     }}
                                 >
                                     Confirm
-                                </button>
+                                </div>
                             </div>
                         </motion.div>
                     </>

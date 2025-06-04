@@ -1,5 +1,6 @@
 import PlayersGrid from "./PlayersGrid.tsx";
 import {useEffect, useState} from "react";
+import {fetchPlayers} from "../lib/fetchFunctions.tsx";
 
 export interface Player {
     Id: number,
@@ -15,20 +16,23 @@ function PlayersComponent() {
     const [filteredPlayerData, setFilteredPlayerData] = useState<PlayerData>(playerData)
     const [refresh, setRefresh] = useState<boolean>(false);
     useEffect(() => {
-        fetch("http://localhost:3001/api/players/all", {
-        })
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to fetch players");
-                return res.json();
-            })
-            .then((data) => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+        fetchPlayers(signal)
+            .then((data: PlayerData) => {
                 setPlayerData(data);
-                setFilteredPlayerData(data);
+                setFilteredPlayerData(data); // Initialize filtered data with all players
             })
-            .catch((error) => {
-                console.error("Error fetching players:", error);
+            .finally(() => {
+                setRefresh(false);
             });
-        setRefresh(false);
+        return () => {
+            abortController.abort();
+            setPlayerData([]);
+            setFilteredPlayerData([]);
+            setPlayerSearch("");
+            setRefresh(false);
+        }
         }, [refresh]);
     useEffect(() => {
         const filteredData =

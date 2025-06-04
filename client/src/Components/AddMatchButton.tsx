@@ -1,21 +1,50 @@
 import {AnimatePresence, motion} from "motion/react"
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import checkValidDateTime from "../lib/checkValidDateTime.ts";
 import { Plus } from 'lucide-react';
+import {RoundInfo} from "./MappoolComponent.tsx";
+import Select from "react-select";
+import {ReactSelectOptions} from "./MatchesComponent.tsx";
+import {playerSelectStyles} from "../lib/playerSelectStyles.tsx";
+import {useToast} from "../context/ToastContext.tsx";
 
-export default function AddMatchButton() {
+interface Props {
+    setRefresh : (refresh: boolean) => void;
+    playerOptions: ReactSelectOptions[];
+    roundsList: RoundInfo[];
+    matchIds: string[];
+}
+
+export default function AddMatchButton({setRefresh, playerOptions, roundsList, matchIds}: Props) {
+        let matchIdCounter = 1;
+        while (matchIds.includes(matchIdCounter.toString())) {
+            matchIdCounter++;
+        }
         const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-        const [matchId, setMatchId] = useState<string>();
-        const [player1Id, setPlayer1Id] = useState<number>();
-        const [player2Id, setPlayer2Id] = useState<number>();
+        const [matchId, setMatchId] = useState<string>(matchIdCounter.toString());
+        const [player1Id, setPlayer1Id] = useState<number>(playerOptions.length  > 0 ? playerOptions[0].value : 0);
+        const [player2Id, setPlayer2Id] = useState<number>(playerOptions.length  > 0 ? playerOptions[0].value : 0);
         const [matchDate, setMatchDate] = useState(new Date().toISOString().slice(0, 10));
         const [matchTime, setMatchTime] = useState(new Date().toISOString().slice(11, 16));
+        const [roundName, setRoundName] = useState<string>(roundsList.length > 0 ? roundsList[0].Acronym : '');
+        const [loading,  setLoading] = useState<boolean>(false);
         const [dateTimeError, setDateTimeError] = useState<boolean>(false);
+        const [samePlayerError, setSamePlayerError] = useState<boolean>(false);
+        const [duplicateMatchIdError, setDuplicateMatchIdError] = useState<boolean>(false);
+        const { showSuccess, showError } = useToast();
         const openModal = () => setIsModalOpen(true);
-        const closeModal = () => setIsModalOpen(false);
+        const closeModal = ()=> {
+            setIsModalOpen(false);
+            setMatchId(matchIdCounter.toString());
+            setPlayer1Id(playerOptions.length  > 0 ? playerOptions[0].value : 0);
+            setPlayer2Id(playerOptions.length  > 0 ? playerOptions[0].value : 0);
+            setMatchDate(new Date().toISOString().slice(0, 10));
+            setMatchTime(new Date().toISOString().slice(11, 16));
+            setRoundName(roundsList.length > 0 ? roundsList[0].Acronym : '');
+            setLoading(false);
+        }
 
         const [hoveringAddMatch, setHoveringAddMatch] = useState<boolean>(false);
-
         useEffect(() => {
             if (!checkValidDateTime(matchDate, matchTime)) {
                 setDateTimeError(true);
@@ -23,10 +52,58 @@ export default function AddMatchButton() {
                 setDateTimeError(false);
             }
         }, [matchDate, matchTime])
+        useEffect(() => {
+            if (player1Id === player2Id) {
+                setSamePlayerError(true);
+            } else {
+                setSamePlayerError(false);
+            }
+        }, [player1Id, player2Id]);
+        useEffect(() => {
+            if (matchIds.includes(matchId)) {
+                setDuplicateMatchIdError(true);
+            } else {
+                setDuplicateMatchIdError(false);
+            }
+        }, [matchId, matchIds]);
+        useEffect(() => {
+            setRoundName(roundsList.length > 0 ? roundsList[0].Acronym : '');
+        }, [roundsList]);
 
         const handleSubmit = async (e: React.FormEvent) => {
             e.preventDefault();
-
+            if (dateTimeError) {
+                return;
+            }
+            setLoading(true);
+            const matchData = {
+                id: matchId,
+                player1Id: player1Id,
+                player2Id: player2Id,
+                date: matchDate,
+                time: matchTime,
+                round: roundName
+            };
+            const response = await fetch("http://localhost:3001/api/matches/add",
+                {
+                    credentials: "include",
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(matchData)
+                }
+                )
+            if (response.ok) {
+                showSuccess("Match added successfully!");
+                setRefresh(true);
+                closeModal();
+            }
+            else {
+                const errorData = await response.json();
+                showError(`${errorData.error}. Please review the match details.`);
+            }
+            setLoading(false);
         };
 
         return (
@@ -92,20 +169,48 @@ export default function AddMatchButton() {
                                             />
                                         </div>
                                     </div>
-
+                                    {duplicateMatchIdError && (
+                                        <div className="text-red-500 text-sm mb-4">
+                                            Match ID already exists. Please choose a different ID.
+                                        </div>
+                                    )}
+                                    <div className={"mt-4"}>
+                                        <label htmlFor="roundName"
+                                               className="block text-sm font-medium text-white mb-1">
+                                            Round Acronym
+                                        </label>
+                                        <select name={"roundName"} id={"roundName"}
+                                                className={"w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"}
+                                                value={roundName}
+                                                onChange={(e) => setRoundName(e.target.value)}
+                                        >
+                                            {roundsList.map((round) => (
+                                                <option key={round.Acronym} value={round.Acronym}>
+                                                    {round.Round}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                     {/* Players' ID */}
                                     <div className="flex gap-4 mt-4">
                                         <div className="w-1/2">
-                                            <label htmlFor="player1Id"
+                                        <label htmlFor="player1Id"
                                                    className="block text-sm font-medium text-white mb-1">
                                                 Player 1 ID
                                             </label>
-                                            <input
-                                                type="number"
-                                                id="player1Id"
-                                                value={player1Id}
-                                                onChange={(e) => setPlayer1Id(parseInt(e.target.value))}
-                                                className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
+                                            <Select
+                                                name="player1Id"
+                                                defaultValue={playerOptions[0]}
+                                                value={playerOptions.find(option => option.value === player1Id)}
+                                                onChange={(selectedOption) =>
+                                                    {
+                                                        setPlayer1Id(selectedOption?.value || playerOptions[0].value)
+                                                    }}
+                                                options={playerOptions}
+                                                isSearchable={true}
+                                                styles={playerSelectStyles}
+                                                className="react-select-container"
+                                                classNamePrefix="react-select"
                                                 required
                                             />
                                         </div>
@@ -114,15 +219,29 @@ export default function AddMatchButton() {
                                             <label htmlFor="player2Id" className="block text-sm font-medium text-white mb-1">
                                                 Player 2 ID
                                             </label>
-                                            <input
-                                                type="text"
-                                                id="player2Id"
-                                                value={player2Id}
-                                                onChange={(e) => setPlayer2Id(parseInt(e.target.value))}
-                                                className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
+                                            <Select
+                                                name="player2Id"
+                                                defaultValue={playerOptions[0]}
+                                                value={playerOptions.find(option => option.value === player2Id)}
+                                                onChange={(selectedOption) =>
+                                                    {
+                                                        setPlayer2Id(selectedOption?.value || playerOptions[0].value)
+                                                    }}
+                                                options={playerOptions}
+                                                isSearchable={true}
+                                                styles={playerSelectStyles}
+                                                className="react-select-container"
+                                                classNamePrefix="react-select"
                                                 required
                                             />
                                         </div>
+                                    </div>
+                                    <div className={'mt-2'}>
+                                        {samePlayerError && (
+                                            <div className="text-red-500 text-sm">
+                                                Player 1 and Player 2 cannot be the same.
+                                            </div>
+                                        )}
                                     </div>
                                     <div className={'flex gap-4 mt-4'}>
                                         <div className="w-1/2">
@@ -170,7 +289,7 @@ export default function AddMatchButton() {
                                         </button>
                                         <button
                                             type="submit"
-                                            className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${dateTimeError ? 'pointer-events-none opacity-50' : ''}`}
+                                            className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${dateTimeError || samePlayerError || duplicateMatchIdError || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                                         >
                                             Confirm
                                         </button>

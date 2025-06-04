@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import checkValidDateTime from "../lib/checkValidDateTime.ts";
 import {AnimatePresence, motion} from "motion/react";
-import { CalendarClock } from 'lucide-react';
+import {CalendarClock} from 'lucide-react';
 
 function RescheduleButton() {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -9,9 +9,9 @@ function RescheduleButton() {
     const [newMatchDate, setNewMatchDate] = useState(new Date().toISOString().slice(0, 10));
     const [newMatchTime, setNewMatchTime] = useState(new Date().toISOString().slice(11, 16));
     const [dateTimeError, setDateTimeError] = useState<boolean>(false);
+    const [hoveringReschedule, setHoveringReschedule] = useState<boolean>(false);
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
-
     useEffect(() => {
         if (!checkValidDateTime(newMatchDate, newMatchTime)) {
             setDateTimeError(true);
@@ -27,30 +27,47 @@ function RescheduleButton() {
 
     return (
         <>
-            <CalendarClock
-                onClick={openModal}
-                className="text-white cursor-pointer hover:text-blue-500 transition-colors duration-300"
-            >
-            </CalendarClock>
 
+            <div onMouseEnter={() => setHoveringReschedule(true)}
+                 onMouseLeave={() => setHoveringReschedule(false)}
+                 className="text-white font-bold w-fit h-1/2 cursor-pointer rounded-full transition-colors duration-300 flex justify-center items-center">
+                <CalendarClock
+                    onClick={openModal}
+                    className="text-white cursor-pointer hover:text-blue-500 transition-colors duration-300"
+                >
+                </CalendarClock>
+                <AnimatePresence>
+                    {hoveringReschedule && (
+                        <motion.div
+                            initial={{opacity: 0, y: -10}}
+                            animate={{opacity: 1, y: 0}}
+                            exit={{opacity: 0, y: -10}}
+                            transition={{type: "spring", damping: 25, stiffness: 300}}
+                            className="absolute text-white text-sm p-2 rounded-md mt-2 translate-y-[-150%] bg-gray-800 shadow-lg z-50"
+                        >
+                            Reschedule
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
             <AnimatePresence>
                 {isModalOpen && (
                     <>
                         {/* Overlay */}
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 0.6 }}
-                            exit={{ opacity: 0 }}
+                            initial={{opacity: 0}}
+                            animate={{opacity: 0.6}}
+                            exit={{opacity: 0}}
                             className="fixed inset-0 bg-gray-700 blur-l z-40"
                             onClick={closeModal}
                         />
 
                         {/* Modal */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            initial={{opacity: 0, scale: 0.9, y: 20}}
+                            animate={{opacity: 1, scale: 1, y: 0}}
+                            exit={{opacity: 0, scale: 0.9, y: 20}}
+                            transition={{type: "spring", damping: 25, stiffness: 300}}
                             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-112"
                         >
                             <h2 className="text-xl font-semibold mb-4 text-white">Reschedule Request</h2>
@@ -74,7 +91,8 @@ function RescheduleButton() {
                                 {/* New Time */}
                                 <div className={'flex gap-4 mt-4'}>
                                     <div className="w-1/2">
-                                        <label htmlFor="newMatchDate" className="block text-sm font-medium text-white mb-1">
+                                        <label htmlFor="newMatchDate"
+                                               className="block text-sm font-medium text-white mb-1">
                                             Match Date
                                         </label>
                                         <input
@@ -88,7 +106,8 @@ function RescheduleButton() {
                                     </div>
 
                                     <div className="w-1/2">
-                                        <label htmlFor="newMatchTime" className="block text-sm font-medium text-white mb-1">
+                                        <label htmlFor="newMatchTime"
+                                               className="block text-sm font-medium text-white mb-1">
                                             Match Time
                                         </label>
                                         <input
