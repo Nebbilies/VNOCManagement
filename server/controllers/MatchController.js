@@ -9,7 +9,9 @@ module.exports = {
                     m.Player1Id, m.Player2Id,
                     m.Player1Score, m.Player2Score,
                     p1.Username AS Player1Username,
-                    p2.Username AS Player2Username
+                    p2.Username AS Player2Username,
+                    p1.Rank AS Player1Rank,
+                    p2.Rank AS Player2Rank
                 FROM matches m
                          LEFT JOIN players p1 ON m.Player1Id = p1.Id
                          LEFT JOIN players p2 ON m.Player2Id = p2.Id
@@ -38,22 +40,24 @@ module.exports = {
             }
 
             const result = matches.map(m => ({
-                Id: m.Id,
-                Round: m.Round,
-                MatchLink: m.MatchLink,
-                Status: m.Status,
-                StartingTime: m.StartingTime,
-                Player1: {
+                id: m.Id,
+                round: m.Round,
+                matchLink: m.MatchLink,
+                status: m.Status,
+                time: m.StartingTime,
+                player1: {
                     Id: m.Player1Id,
                     Username: m.Player1Username,
-                    Score: m.Player1Score
+                    Rank: m.Player1Rank
                 },
-                Player2: {
+                player2: {
                     Id: m.Player2Id,
                     Username: m.Player2Username,
-                    Score: m.Player2Score
+                    Rank: m.Player2Rank
                 },
-                Staff: matchStaffMap[m.Id] || []
+                player1Score: m.Player1Score || 0,
+                player2Score: m.Player2Score || 0,
+                staff: matchStaffMap[m.Id] || []
             }));
 
             res.json(result);
@@ -110,14 +114,15 @@ module.exports = {
             round,
             player1Score,
             player2Score,
-            matchLink
+            matchLink,
+            status
         } = req.body;
 
         if (!["ADMIN", "REFEREE"].includes(req.user.role)) {
             return res.status(403).json({ error: "Permission denied" });
         }
 
-        if (!newId || !player1Id || !player2Id || !date || !time || !round) {
+        if (!newId || !player1Id || !player2Id || !date || !time || !round || !status) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
@@ -147,9 +152,10 @@ module.exports = {
                 Round = ?, 
                 Player1Score = ?, 
                 Player2Score = ?, 
-                MatchLink = ?
+                MatchLink = ?,
+                Status = ?
                 WHERE Id = ?`,
-                [newId, player1Id, player2Id, startingTime, round, player1Score || 0, player2Score || 0, matchLink || null, oldId]
+                [newId, player1Id, player2Id, startingTime, round, player1Score || 0, player2Score || 0, matchLink || null, status, oldId]
             );
 
             res.json({ message: "Match updated successfully" });
@@ -179,7 +185,7 @@ module.exports = {
     async claimMatch(req, res) {
         try {
             const user = req.user;
-            const validRoles = ["REFEREE", "COMMENTATOR", "STREAMER"];
+            const validRoles = ["REFEREE", "COMMENTATOR", "STREAMER", "ADMIN"];
             if (!validRoles.includes(user.role)) {
                 return res.status(403).json({ error: "Forbidden" });
             }

@@ -8,7 +8,7 @@ router.get("/", MatchController.getAllMatches);
 
 // Protected routes (admin or referee)
 router.post("/add", checkRole, MatchController.addMatch);
-router.put("/edit", checkRole, MatchController.editMatch);
+router.put("/edit/:id", checkRole, MatchController.editMatch);
 router.delete("/:id", checkRole, MatchController.deleteMatch);
 router.post("/claim", checkRole, MatchController.claimMatch);
 
