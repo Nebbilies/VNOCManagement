@@ -34,7 +34,10 @@ const RoundRouter = require("./routes/RoundRouter.js");
 app.use("/api/round", RoundRouter);
 
 const matchRouter = require("./routes/MatchRouter.js");
-app.use("/api/match", matchRouter);
+app.use("/api/matches", matchRouter);
+
+const ReschRouter = require("./routes/RescheduleRouter.js");
+app.use("/api/resch", ReschRouter);
 
 app.listen(3001, () => {
     console.log("Server running on http://localhost:3001");

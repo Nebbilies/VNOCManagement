@@ -9,4 +9,3 @@ router.delete("/remove/:id", checkRole, PlayerController.removePlayer);
 router.get("/all",  PlayerController.getAllPlayers);
 
 module.exports = router;
-    
