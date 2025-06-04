@@ -1,15 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../database/db");
+const RoundController = require("../controllers/RoundController");
+const checkRole = require("../middlewares/checkRole");
 
-router.get("/", async (req, res) => {
-    try {
-        const [rows] = await pool.query("SELECT * FROM rounds");
-        res.json(rows);
-    } catch (err) {
-        console.error("[getRounds] Error:", err);
-        res.status(500).json({ error: "Failed to fetch rounds" });
-    }
-});
+router.get("/", RoundController.getRound);
+router.post("/add", checkRole, RoundController.addRound);
+router.post("/edit", checkRole, RoundController.editRound);
 
 module.exports = router;
