@@ -102,7 +102,7 @@ export function AddStaffButton({toggleRefresh}: Props) {
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
                             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
                         >
-                            <h2 className="text-xl font-semibold mb-4 text-white">Add Match</h2>
+                            <h2 className="text-xl font-semibold mb-4 text-white">Add Staff</h2>
 
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-4">
@@ -131,7 +131,6 @@ export function AddStaffButton({toggleRefresh}: Props) {
                                             onChange={(e) => setPosition(e.target.value)}
                                             className="w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"
                                             required>
-                                            <option value="ADMIN">Admin</option>
                                             <option value="REFEREE">Referee</option>
                                             <option value="STREAMER">Streamer</option>
                                             <option value="COMMENTATOR">Commentator</option>
