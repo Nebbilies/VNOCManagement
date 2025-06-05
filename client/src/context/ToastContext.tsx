@@ -28,13 +28,21 @@ interface ToastProviderProps {
 
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     const [toast, setToast] = useState<ToastState | null>(null);
-
+    const [key, setKey] = useState<number>(0);
     const showSuccess = (message: string) => {
-        setToast({ message, type: 'success' });
+        setToast(null)
+        setTimeout(() => {
+            setToast({ message, type: 'success' });
+            setKey(prevKey => prevKey + 1);
+        }, 10);
     };
 
     const showError = (message: string) => {
-        setToast({ message, type: 'error' });
+        setToast(null)
+        setTimeout(() => {
+            setToast({ message, type: 'error' });
+            setKey(prevKey => prevKey + 1);
+        }, 10);
     };
 
     const clearToast = () => {
