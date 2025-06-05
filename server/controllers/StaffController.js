@@ -49,10 +49,8 @@ module.exports = {
 
 
     async removeStaff(req, res) {
-        console.log("[removeStaff] Request received");
 
         if (req.user.role !== "ADMIN") {
-            console.log("[removeStaff] Forbidden access by non-admin");
             return res.status(403).json({ error: "Forbidden" });
         }
 
@@ -60,9 +58,10 @@ module.exports = {
 
         try {
             const [result] = await pool.query("DELETE FROM staffs WHERE Id = ?", [id]);
+            pool.query("DELETE FROM match_staff WHERE StaffId = ?", [id]);
 
             if (result.affectedRows === 0) {
-                return res.status(404).json({ error: "Staff not found" });
+                return res.status(409).json({ error: "Staff not found" });
             }
 
             console.log("[removeStaff] Staff removed successfully:", id);
