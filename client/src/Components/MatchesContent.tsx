@@ -81,7 +81,7 @@ function MatchesContent({match, index}: Props) {
                                 <img src={horizontal_line} alt={'horizontal line'} className={'opacity-50'}/>
                                 <div className={'controllers flex w-full h-1/2 justify-center items-center gap-4 mt-1'}>
                                     {/*localStorage.playerId = player1.id or player2.id?*/}
-                                    <RescheduleButton/>
+                                    <RescheduleButton matchId={match.id}/>
                                     <EditMatchButton currentMatch={match}/>
                                     <ClaimMatchButton matchId={match.id}/>
                                     <DeleteMatchButton matchId={match.id}/>
