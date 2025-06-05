@@ -26,7 +26,7 @@ module.exports = {
 
         } catch (err) {
             console.error("[addRound] Error occurred:", err.message);
-            return res.status(500).json({ error: "Failed to register staff" });
+            return res.status(500).json({ error: "Failed to add round" });
         }
     },
 
