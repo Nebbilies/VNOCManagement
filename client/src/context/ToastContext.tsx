@@ -54,6 +54,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
             {children}
             {toast && (
                 <Toast
+                    key={key}
                     message={toast.message}
                     type={toast.type}
                     onClose={clearToast}
