@@ -1,7 +1,7 @@
 import {PlayerData} from "./PlayersComponent.tsx";
 import {AnimatePresence, motion} from "motion/react";
-import {useState} from "react";
-import {Trash2} from "lucide-react";
+import {useEffect, useState} from "react";
+import {Trash2, ChevronLeft, ChevronRight} from "lucide-react";
 import {useToast} from "../context/ToastContext.tsx";
 
 interface Props {
@@ -13,12 +13,60 @@ const hidden = {opacity: 0, x: 0, y: -10}
 const enter = {opacity: 1, x: 0, y: 0}
 const exit = {opacity: 0, x: 0, y: -10}
 
+let ROWS_PER_PAGE = 5;
 
 function PlayersGrid({playerData, toggleRefresh}: Props) {
+    const [ page, setPage ] = useState(1);
+    const [ playersPerPage, setPlayersPerPage ] = useState(30);
     const { showSuccess, showError } = useToast();
     const [hoveredPlayer, setHoveredPlayer] = useState(-1)
     const [deletePlayer, setDeletePlayer] = useState(-1)
     const [loading, setLoading] = useState(false);
+    //page related functions
+    useEffect(() => {
+        function calculatePlayersPerPage() {
+            const width = window.innerWidth;
+            let columns = 2;
+            if (width >= 1280) {
+                columns = 6;
+                ROWS_PER_PAGE = 4;
+            } else if (width >= 1024) {
+                columns = 5;
+                ROWS_PER_PAGE = 4;
+            } else if (width >= 768) {
+                columns = 4;
+                ROWS_PER_PAGE = 5;
+            } else if (width >= 640) {
+                columns = 3;
+                ROWS_PER_PAGE = 5;
+            }
+            setPlayersPerPage(columns * ROWS_PER_PAGE);
+        }
+        calculatePlayersPerPage();
+        window.addEventListener('resize', calculatePlayersPerPage);
+        return () => window.removeEventListener('resize', calculatePlayersPerPage);
+    }, []);
+    useEffect(() => {
+        const totalPages = Math.ceil(playerData.length / playersPerPage);
+        if (page > totalPages && totalPages > 0) {
+            setPage(totalPages);
+        }
+    }, [playersPerPage, playerData.length, page]);
+    const totalPages = Math.ceil(playerData.length / playersPerPage);
+    const startIndex = (page - 1) * playersPerPage;
+    const endIndex = startIndex + playersPerPage;
+    const currentPlayers = playerData.slice(startIndex, endIndex);
+    const nextPage = () => {
+        if (page < totalPages) {
+            setPage(page + 1);
+        }
+    }
+    const prevPage = () => {
+        if (page > 1) {
+            setPage(page - 1);
+        }
+    }
+
     async function onDeletePlayer() {
         setLoading(true);
         const response = await fetch(`http://localhost:3001/api/players/remove/${deletePlayer}`, {
@@ -38,9 +86,10 @@ function PlayersGrid({playerData, toggleRefresh}: Props) {
         }, 4000);
     }
     return (
+        <>
         <div
             className="players-grid grid grid-cols-2 xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 auto-rows-auto w-full h-auto gap-x-3 md:gap-x-4 xl:gap-x-5 sm:gap-y-3 md:gap-y-6 lg:gap-y-10 place-items-center overflow-hidden mt-10 gap-y-10 py-5 px-1">
-            {playerData.map((player, index) => (
+            {currentPlayers.map((player, index) => (
                 <motion.div className={'w-full h-full'}
                             key={player.Id}
                             initial={hidden}
@@ -130,6 +179,30 @@ function PlayersGrid({playerData, toggleRefresh}: Props) {
                 </motion.div>
             ))}
         </div>
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center mt-8 mb-4 gap-4">
+                    <button
+                        onClick={prevPage}
+                        disabled={page === 1}
+                        className={`flex items-center justify-center p-2 rounded-full ${page === 1 ? 'text-gray-500 cursor-not-allowed' : 'text-white hover:bg-[#353d60]'}`}
+                    >
+                        <ChevronLeft className="w-6 h-6" />
+                    </button>
+
+                    <div className="text-white">
+                        Page {page} of {totalPages}
+                    </div>
+
+                    <button
+                        onClick={nextPage}
+                        disabled={page === totalPages}
+                        className={`flex items-center justify-center p-2 rounded-full ${page === totalPages ? 'text-gray-500 cursor-not-allowed' : 'text-white hover:bg-[#353d60]'}`}
+                    >
+                        <ChevronRight className="w-6 h-6" />
+                    </button>
+                </div>
+            )}
+        </>
     )
 }
 
