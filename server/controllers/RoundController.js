@@ -6,6 +6,7 @@ module.exports = {
             const [rows] = await pool.query("SELECT * FROM rounds");
             res.json(rows);
             }
+
         catch (err) {
             console.error("[getRounds] Error:", err);
             res.status(500).json({error: "Failed to fetch rounds"});
@@ -13,6 +14,7 @@ module.exports = {
     },
 
     async addRound(req, res) {
+
         if (req.user.role !== "ADMIN") {
             return res.status(403).json({ error: "Forbidden" });
         }
@@ -40,7 +42,7 @@ module.exports = {
 
 
         try {
-            const [rows] = await pool.query(`UPDATE rounds
+            const [rows] = await pool.query(`UPDATE rounds   
                 SET Acronym = ?, Round = ?
                 WHERE Acronym = ?`,
                 [newAcronym, newRound, oldAcronym])

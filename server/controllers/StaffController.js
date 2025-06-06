@@ -4,8 +4,6 @@ const osuService = require("../service/GetUserInfo");
 module.exports = {
 
     async addStaff(req, res) {
-        console.log("[addStaff] Request received");
-
         const { id, role } = req.body;
         const token = req.cookies.osu_token;
         if (!id || !role) {
@@ -23,8 +21,6 @@ module.exports = {
             const user = await osuService.getUserById(id, token);
             const username = user.username;
 
-            console.log("[addStaff] osu! user fetched:", username);
-
             // Check if staff already exists
             const [existing] = await pool.query("SELECT * FROM staffs WHERE id = ?", id);
             if (existing.length > 0) {
@@ -37,7 +33,6 @@ module.exports = {
 
             // Insert new staff
             await pool.query("INSERT INTO staffs (id, Role, Username) VALUES (?, ?, ?)", [id, role, username]);
-            console.log("[addStaff] Staff registered successfully:", { id, role, username });
 
             return res.json({ message: "Staff registered", username, role });
 
@@ -49,7 +44,6 @@ module.exports = {
 
 
     async removeStaff(req, res) {
-
         if (req.user.role !== "ADMIN") {
             return res.status(403).json({ error: "Forbidden" });
         }
@@ -64,7 +58,6 @@ module.exports = {
                 return res.status(409).json({ error: "Staff not found" });
             }
 
-            console.log("[removeStaff] Staff removed successfully:", id);
             res.json({ message: "Staff removed" });
         } catch (err) {
             console.error("[removeStaff] Error occurred:", err);
@@ -73,8 +66,6 @@ module.exports = {
     },
 
     async getAllStaff(req, res) {
-        console.log("[getAllStaff] Request received");
-
         try {
             const [staffList] = await pool.query("SELECT * FROM staffs");
             res.json(staffList);

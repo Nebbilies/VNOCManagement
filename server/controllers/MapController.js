@@ -48,7 +48,7 @@ module.exports = {
         const { round, id, mod, index } = req.body;
 
         if (!["MAPPOOLER", "ADMIN"].includes(req.user.role)) {
-            return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+            return res.status(403).json({ error: "Forbidden" });
         }
 
         if (!round || !id || !mod || !index) {
@@ -56,7 +56,6 @@ module.exports = {
         }
 
         try {
-            // Fetch beatmap data from osu! API
             const beatmap = await getBeatmapInfo(id, index);
             console.log(beatmap);
             await pool.query(
@@ -152,7 +151,6 @@ module.exports = {
 
                 return res.json({ message: "Beatmap updated successfully" });
             } else {
-                // 🔁 Case 2: Move to new Mod/Index
                 const [conflict] = await pool.query(
                     "SELECT * FROM map WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?",
                     [round, newMod, newIndex]
@@ -162,7 +160,6 @@ module.exports = {
                     return res.status(409).json({ error: "Target slot already occupied" });
                 }
 
-                // Delete old slot
                 const [delResult] = await pool.query(
                     "DELETE FROM map WHERE Round = ? AND \`Mod\` = ? AND \`Index\` = ?",
                     [round, oldMod, oldIndex]
@@ -172,7 +169,6 @@ module.exports = {
                     return res.status(404).json({ error: "Original slot not found" });
                 }
 
-                // Fetch metadata and insert new map
                 const beatmap = await getBeatmapInfo(newId, newIndex);
 
                 await pool.query(
@@ -212,7 +208,7 @@ module.exports = {
         const { round, index, mod } = req.body;
 
         if (!["MAPPOOLER", "ADMIN"].includes(req.user.role)) {
-            return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+            return res.status(403).json({ error: "Forbidden" });
         }
 
         if (!round || !index || !mod) {

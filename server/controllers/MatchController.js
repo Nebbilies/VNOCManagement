@@ -192,7 +192,6 @@ module.exports = {
 
             const { matchId } = req.body;
 
-            // Kiểm tra đã claim chưa
             const [existing] = await pool.query(
                 `SELECT * FROM match_staff WHERE MatchId = ? AND StaffId = ?`,
                 [matchId, user.id]
@@ -201,7 +200,6 @@ module.exports = {
                 return res.status(400).json({ error: "You already claimed this match" });
             }
 
-            // Kiểm tra slot full chưa (tối đa 3: ref, comm, strim)
             const [staffs] = await pool.query(
                 `SELECT s.Role FROM match_staff ms
              JOIN staffs s ON ms.StaffId = s.Id
@@ -221,10 +219,9 @@ module.exports = {
             }
 
 
-            // Claim
             await pool.query(`INSERT INTO match_staff (MatchId, StaffId) VALUES (?, ?)`, [matchId, user.id]);
 
-            res.json({ message: "You have claimed the match successfully" });
+            res.json({ message: "Match claimed successfully" });
         } catch (err) {
             console.error("[claimMatch] Error:", err);
             res.status(500).json({ error: "Failed to claim match" });

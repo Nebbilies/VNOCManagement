@@ -3,7 +3,7 @@ const pool = require("../database/db");
 module.exports = {
     async getReschedule(req, res) {
         try {
-            const { status, playerRequestId, playerRespondId, matchId, id } = req.query;
+            const {status, playerRequestId, playerRespondId, matchId, id} = req.query;
 
             const conditions = [];
             const values = [];
@@ -29,22 +29,28 @@ module.exports = {
                 values.push(id);
             }
 
-            const [rows] = await pool.query(`
-                SELECT
-                    rr.Id AS id,
-                    rr.MatchId AS matchId,
-                    rr.NewTime AS newTime,
-                    rr.Reason AS reason,
-                    rr.Status AS status,
-                    pr.Id AS playerRequestId,
-                    pr.Username AS playerRequestUsername,
-                    pr.Rank AS playerRequestRank,
-                    pres.Id AS playerRespondId,
-                    pres.Username AS playerRespondUsername,
-                    pres.Rank AS playerRespondRank
-                FROM reschedule_request rr
-                         JOIN players pr ON rr.PlayerRequestId = pr.Id
-                         JOIN players pres ON rr.PlayerRespondId = pres.Id`)
+            const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
+            const [rows] = await pool.query(
+                `
+                    SELECT rr.Id         AS id,
+                           rr.MatchId    AS matchId,
+                           rr.NewTime    AS newTime,
+                           rr.Reason     AS reason,
+                           rr.Status     AS status,
+                           pr.Id         AS playerRequestId,
+                           pr.Username   AS playerRequestUsername,
+                           pr.Rank       AS playerRequestRank,
+                           pres.Id       AS playerRespondId,
+                           pres.Username AS playerRespondUsername,
+                           pres.Rank     AS playerRespondRank
+                    FROM reschedule_request rr
+                             JOIN players pr ON rr.PlayerRequestId = pr.Id
+                             JOIN players pres ON rr.PlayerRespondId = pres.Id
+                        ${whereClause}
+                `,
+                values
+            );
 
             const formatted = rows.map(row => ({
                 Id: row.id,
@@ -67,9 +73,11 @@ module.exports = {
             res.json(formatted);
         } catch (err) {
             console.error("[getReschedule] Error:", err);
-            res.status(500).json({ error: "Failed to retrieve reschedule requests" });
+            res.status(500).json({error: "Failed to retrieve reschedule requests"});
         }
-    },async initiateReschedule(req, res) {
+    },
+
+    async initiateReschedule(req, res) {
         const { matchId, newDate, newTime, reason } = req.body;
         const playerRequestId = req.user?.id;
 
@@ -95,8 +103,8 @@ module.exports = {
                 [matchId, combinedTime, reason, playerRequestId, playerRespondId]
             );
 
-            // return the auto-generated reschedule ID
             res.json({ message: "Reschedule request created", id: result.insertId });
+
         } catch (err) {
             console.error("[initiateReschedule] Error:", err);
             res.status(500).json({ error: "Failed to create reschedule request" });
@@ -168,6 +176,7 @@ module.exports = {
 
             await pool.query("UPDATE reschedule_request SET status = ? WHERE id = ?", [Status, Id]);
             res.json({ message: `Reschedule status updated to ${Status}` });
+
         } catch (err) {
             console.error("[respondReschedule] Error:", err);
             res.status(500).json({ error: "Failed to update request status" });

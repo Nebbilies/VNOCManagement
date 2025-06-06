@@ -136,7 +136,6 @@ module.exports = {
             sameSite: 'lax',
         });
 
-        // Option 1: redirect to frontend home (customize as needed)
         res.redirect("http://localhost:5173/");
     }
 
