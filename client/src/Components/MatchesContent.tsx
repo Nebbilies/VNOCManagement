@@ -7,6 +7,7 @@ import {DeleteMatchButton} from "./DeleteMatchButton.tsx";
 import {Staff} from "./StaffComponent.tsx";
 import {StaffRole} from "./MatchesStaff.tsx";
 import {ClaimMatchButton} from "./ClaimMatchButton.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 interface Props {
     match: Match;
@@ -24,13 +25,19 @@ const enter = {opacity: 1, x: 0, y: 0}
 const exit = {opacity: 0, x: 0, y: -30}
 
 function MatchesContent({match, index}: Props) {
+    const {user} = useUser();
+    let userRole: string = "";
+    let userId: number = 0;
+    if (user) {
+        userRole = user.role;
+        userId = user.id;
+    }
     const processStaffData = (staffArray: Staff[]) => {
         const groupedStaff: groupedStaff = {
             COMMENTATOR: [],
             REFEREE: [],
             STREAMER: []
         };
-
         staffArray.forEach(member => {
             if (member.Role === "COMMENTATOR") {
                 groupedStaff.COMMENTATOR.push(member);
@@ -44,7 +51,6 @@ function MatchesContent({match, index}: Props) {
         return groupedStaff;
     };
     const matchDate = match.time.split("T")[0];
-    //Take only hh:mm
     const matchTime = match.time.split("T")[1].split(":").slice(0, 2).join(":");
     const staffByRole = processStaffData(match.staff);
     return (
@@ -80,11 +86,18 @@ function MatchesContent({match, index}: Props) {
                                 </div>
                                 <img src={horizontal_line} alt={'horizontal line'} className={'opacity-50'}/>
                                 <div className={'controllers flex w-full h-1/2 justify-center items-center gap-4 mt-1'}>
-                                    {/*localStorage.playerId = player1.id or player2.id?*/}
-                                    <RescheduleButton matchId={match.id}/>
-                                    <EditMatchButton currentMatch={match}/>
-                                    <ClaimMatchButton matchId={match.id}/>
-                                    <DeleteMatchButton matchId={match.id}/>
+                                    {userId === match.player1.Id || userId === match.player2.Id ? (
+                                        <RescheduleButton matchId={match.id}/>
+                                    ) : null}
+                                    {userRole === "ADMIN" || userRole === "REFEREE" ? (
+                                        <>
+                                            <EditMatchButton currentMatch={match}/>
+                                            <DeleteMatchButton matchId={match.id}/>
+                                        </>
+                                    ) : null}
+                                    {userRole === "REFEREE" || userRole === "ADMIN" || userRole === "COMMENTATOR" || userRole === "STREAMER" ? (
+                                        <ClaimMatchButton matchId={match.id}/>
+                                    ): null}
                                 </div>
                             </div>
                             <div
@@ -109,7 +122,7 @@ function MatchesContent({match, index}: Props) {
                                 {/* Commentators */}
                                 {staffByRole.COMMENTATOR.length > 0 && (
                                     <StaffRole
-                                        title="Commentators"
+                                        title="Commentator"
                                         members={staffByRole.COMMENTATOR}
                                     />
                                 )}

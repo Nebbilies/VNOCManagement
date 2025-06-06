@@ -3,6 +3,7 @@ import {AnimatePresence, motion} from "motion/react";
 import {useEffect, useState} from "react";
 import {Trash2, ChevronLeft, ChevronRight} from "lucide-react";
 import {useToast} from "../context/ToastContext.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 interface Props {
     playerData: PlayerData
@@ -16,6 +17,11 @@ const exit = {opacity: 0, x: 0, y: -10}
 let ROWS_PER_PAGE = 5;
 
 function PlayersGrid({playerData, toggleRefresh}: Props) {
+    const {user} = useUser();
+    let userRole = "";
+    if (user) {
+        userRole = user.role;
+    }
     const [ page, setPage ] = useState(1);
     const [ playersPerPage, setPlayersPerPage ] = useState(30);
     const { showSuccess, showError } = useToast();
@@ -76,14 +82,13 @@ function PlayersGrid({playerData, toggleRefresh}: Props) {
         if (!response.ok) {
             const errorData = await response.json();
             showError(errorData.error || "Failed to delete player");
+            setLoading(false);
             throw new Error("Failed to delete player");
         }
         showSuccess(`Player ${deletePlayer} deleted successfully!`);
         toggleRefresh(true);
         setDeletePlayer(0);
-        setTimeout(() => {
-            setLoading(false);
-        }, 4000);
+        setLoading(false);
     }
     return (
         <>
@@ -102,7 +107,7 @@ function PlayersGrid({playerData, toggleRefresh}: Props) {
                         onMouseLeave={() => setHoveredPlayer(-1)}
                         key={player.Id}
                         className="player-card bg-[#131724] border-8 border-[#353d60] rounded-[12px] flex flex-col w-10/11 relative">
-                        {hoveredPlayer === player.Id && (
+                        {hoveredPlayer === player.Id && userRole === "ADMIN" ? (
                             <button
                                 onClick={() =>
                                     setDeletePlayer(player.Id)
@@ -112,7 +117,7 @@ function PlayersGrid({playerData, toggleRefresh}: Props) {
                             >
                                 <Trash2 className="w-5 h-5 text-white"/>
                             </button>
-                        )}
+                        ) : null}
                         <div
                             className={"text-center px-2 py-3 truncate inline overflow-hidden text-md font-bold w-full border-b-8 border-[#353d60]"}>
                             {player.Username}
@@ -161,12 +166,12 @@ function PlayersGrid({playerData, toggleRefresh}: Props) {
                                             <button onClick={() =>
                                                 setDeletePlayer(-1)
                                             }
-                                                    className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                                                    className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}>
                                                 Cancel
                                             </button>
                                             <button onClick={() => {
                                                 onDeletePlayer();
-                                            }} className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                                            }} className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}>
                                                 Delete
                                             </button>
                                         </div>

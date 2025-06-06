@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import {LogOut, Menu, X} from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
 import {handleLogOut} from "./Header.tsx";
+import NotificationButton from "./NotificationButton.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 interface Props {
     links: Array<{ name: string, path: string }>;
@@ -12,17 +14,20 @@ interface Props {
 
 
 function SidebarHeader({ links }: Props) {
+    const {user} = useUser();
     const [isOpen, setIsOpen] = useState(false);
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
     };
-    const user = JSON.parse(window.localStorage.getItem("user") || "null");
-
     return (
-        <div className="lg:hidden">
+        <div className="lg:hidden flex fixed top-4 right-6 z-999 text-white">
+            {user &&
+                <NotificationButton mode={'mobile'}/>
+            }
+
                 <button
                     onClick={toggleSidebar}
-                    className="p-2 focus:outline-none fixed top-4 right-4 z-999 bg-[#1b1d20] text-white rounded-full shadow-lg"
+                    className="p-2 focus:outline-none bg-[#1b1d20] text-white rounded-full shadow-lg ml-4"
                     aria-label={isOpen ? "Close menu" : "Open menu"}
                 >
                     {isOpen ? <X size={24} /> : <Menu size={24} />}

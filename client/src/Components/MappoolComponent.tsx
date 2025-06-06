@@ -446,8 +446,8 @@ function MappoolComponent() {
         <div className={"mappool-container flex flex-col max-w-screen h-auto px-4 lg:px-8 " +
             "mt-20 lg:mt-40 mb-20 pt-5 pb-10 md:mx-10 lg:mx-36 xl:mx-64 self-center text-white bg-gray-900/20"}>
             <div className={"mappool-header flex flex-col w-full text-5xl font-black gap-4 lg:gap-0"}>
-                <div className={"w-full italic flex lg:flex-row items-center justify-between"}>
-                    <div className={"mappool-header-text italic lg:text-start text-center"}>
+                <div className={"w-full flex lg:flex-row items-center justify-between"}>
+                    <div className={"mappool-header-text lg:text-start text-center"}>
                         MAPPOOL
                     </div>
                     {userRole === 'MAPPOOLER' || userRole === 'ADMIN' ? (

@@ -12,6 +12,10 @@ interface Props {
 
 function NotificationButton({mode}: Props) {
     const {user} = useUser();
+    let userId = 0;
+    if (user) {
+        userId = user.id;
+    }
     const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
     const [rescheduleNotifications, setRescheduleNotifications] = useState<RescheduleRequest[]>([]); // Adjust type as needed
     const menuRef = useRef<HTMLDivElement>(null);
@@ -43,11 +47,14 @@ function NotificationButton({mode}: Props) {
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
-        fetchRescheduleRequests({signal, status: "APPROVED", playerRespondId: user?.id})
+        fetchRescheduleRequests({signal, status: "APPROVED", playerRespondId: userId})
             .then((data: RescheduleRequest[]) => {
                 setRescheduleNotifications(data);
             })
             .catch((error) => {
+                if (error.name === 'AbortError') {
+                    return;
+                }
                 console.error("Error fetching reschedule requests:", error);
             });
         return () => {

@@ -9,6 +9,7 @@ import {useState, useEffect} from "react";
 import {Loading} from "./Loading.tsx";
 import {fetchMatches, fetchPlayers, fetchRescheduleRequests, fetchRounds} from "../lib/fetchFunctions.tsx"
 import {useToast} from "../context/ToastContext.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 export interface Match {
     id: string;
@@ -45,6 +46,11 @@ const sortMatchesByTime = (matches: MatchData): MatchData => {
 }
 
 function MatchesComponent() {
+    const {user} = useUser();
+    let userRole = "";
+    if (user) {
+        userRole = user.role;
+    }
     const {showError} = useToast();
     const [matchData, setMatchData] = useState<MatchData>([])
     const [fetchingData, setFetchingData] = useState<boolean>(true)
@@ -129,10 +135,14 @@ function MatchesComponent() {
         <div className={"matches-container flex flex-col max-w-screen h-auto lg:px-8 " +
             "mt-20 lg:mt-40 mb-20 pt-5 pb-10 md:mx-10 lg:mx-20 xl:mx-64 mx-2 self-center text-white bg-gray-900/20"}>
             <div className={"matches-header flex items-center justify-between h-20"}>
-                <h1 className={"lg:text-6xl font-black text-5xl"}>Matches</h1>
+                <h1 className={"lg:text-5xl font-black text-4xl"}>MATCHES</h1>
                 <div className={'controller-buttons flex items-center gap-4 h-full'}>
-                    <AddMatchButton setRefresh={setRefresh} playerOptions={playerOptions} roundsList={roundsList} matchIds={matchIds}/>
-                    <ManageMatchButton/>
+                        {userRole === "REFEREE" || userRole === "ADMIN" ? (
+                            <AddMatchButton setRefresh={setRefresh} playerOptions={playerOptions} roundsList={roundsList} matchIds={matchIds}/>
+                        ) : null}
+                    {userRole === "ADMIN" && (
+                        <ManageMatchButton/>
+                    )}
                 </div>
             </div>
             { fetchingData ? (

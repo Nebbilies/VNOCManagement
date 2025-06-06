@@ -132,6 +132,8 @@ const EditRoundModal = ({setRefresh, round}: EditRoundModalProps) => {
 }
 
 export function TourneyRoundsModal() {
+    const [loading, setLoading] = useState<boolean>(false);
+    const {showSuccess, showError} = useToast();
     const [isAddRoundModalOpen, setIsAddRoundModalOpen] = useState<boolean>(false);
     const [hoveringRound, setHoveringRound] = useState<string>("");
     const closeAddRoundModal = () => {
@@ -140,6 +142,28 @@ export function TourneyRoundsModal() {
     const [roundsList, setRoundsList] = useState<RoundInfo[]>([]);
     const [refresh, setRefresh] = useState<boolean>(false);
     const handleDelete = async (roundAcronym: string) => {
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:3001/api/round/delete', {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({Acronym: roundAcronym}),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                showError(`Error deleting round: ${errorData.error}`);
+                throw new Error(`Error deleting round: ${errorData.error}`);
+            }
+            showSuccess(`Round ${roundAcronym} deleted successfully!`);
+            setRefresh(true);
+        } catch (error) {
+            console.error('Error deleting round:', error);
+        } finally {
+            setLoading(false);
+        }
     }
     useEffect(() => {
         const abortController = new AbortController();
@@ -160,7 +184,7 @@ export function TourneyRoundsModal() {
             <div className="flex-col w-full lg:w-1/2 bg-[#23263a] p-6 rounded-lg shadow-2xl">
                 <h2 className="text-xl font-semibold mb-4 text-white text-center">Tourney Rounds</h2>
                 <div
-                    className={'rounds-list flex flex-col rounded-md bg-[#1b1d2e] w-full h-60 overflow-y-scroll items-center'}>
+                    className={`rounds-list flex flex-col rounded-md bg-[#1b1d2e] w-full h-60 overflow-y-scroll items-center ${loading ? 'pointer-events-none opacity-50' : ''}`}>
                     {roundsList.map((round, index) => (
                         <div
                             key={index}
@@ -178,6 +202,7 @@ export function TourneyRoundsModal() {
                                         <EditRoundModal setRefresh={setRefresh} round={round}/>
                                         <div
                                             className="text-red-500 hover:text-red-700 p-1 rounded-full cursor-pointer bg-[#1b1d2e] "
+                                            onClick={() => handleDelete(round.Acronym)}
                                             aria-label="Reject Request">
                                             <Ban className="w-5 h-5"/>
                                         </div>

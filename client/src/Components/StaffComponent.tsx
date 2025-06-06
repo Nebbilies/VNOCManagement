@@ -2,6 +2,7 @@ import StaffGrid from "./StaffGrid";
 import {AddStaffButton} from "./AddStaffButton.tsx";
 import {useState, useEffect} from "react";
 import {Loading} from "./Loading.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 export const roles = [
     "Admin",
@@ -21,6 +22,11 @@ export interface Staff {
 //Interface for staff
 
 function StaffComponent() {
+    const {user} = useUser();
+    let userRole = "";
+    if (user) {
+        userRole = user.role;
+    }
     const [staff, setStaff] = useState<Staff[]>([]);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
@@ -41,7 +47,9 @@ function StaffComponent() {
             "mt-20 lg:mt-40 mb-20 pt-10 pb-10 md:mx-16 lg:mx-36 xl:mx-64 mx-8 self-center text-white bg-gray-900/50 rounded-3xl"}>
             <div className={"flex w-full justify-between items-center h-20"}>
                 <h1 className={"lg:text-6xl text-5xl font-black"}>Staff</h1>
-                <AddStaffButton toggleRefresh={setRefresh} />
+                {userRole === "ADMIN" &&
+                    <AddStaffButton toggleRefresh={setRefresh} />
+                }
             </div>
             <div className={"h-1 w-1/2 border-2 border-white rounded-2xl mt-10"}></div>
                 <div className={'w-full flex flex-col items-center justify-center'}>

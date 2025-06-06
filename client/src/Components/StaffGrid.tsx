@@ -3,6 +3,7 @@ import {useState} from "react";
 import {AnimatePresence, motion} from "motion/react";
 import {Trash2} from "lucide-react";
 import {useToast} from "../context/ToastContext.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 const hidden = {opacity: 0, x: 0, y: -10}
 const enter = {opacity: 1, x: 0, y: 0}
@@ -15,30 +16,35 @@ interface Props {
 
 
 function StaffGrid({staffList, toggleRefresh}: Props) {
+    const {user} = useUser();
+    let userRole = "";
+    if (user) {
+        userRole = user.role;
+    }
     const [hoveredStaff, setHoveredStaff] = useState(0)
     const [deleteStaff, setDeleteStaff] = useState<number>()
     const [loading, setLoading] = useState(false);
     const {showSuccess, showError} = useToast();
     const onDeleteStaff = async (staffId: number) => {
         setLoading(true);
-        const response = await fetch(`http://localhost:3001/api/staff/remove/${staffId}`, {
-            credentials: 'include',
-            method: 'DELETE',
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            showError(errorData);
-            throw new Error('Network response was not ok');
+        try {
+            const response = await fetch(`http://localhost:3001/api/staff/remove/${staffId}`, {
+                credentials: 'include',
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                showError(errorData.error);
+                throw new Error('Failed to delete staff');
+            }
+            showSuccess(`Staff ${staffId} deleted successfully!`);
+            toggleRefresh(true);
+            setDeleteStaff(0);
+        } catch (error) {
+            console.error('Error deleting staff:', error);
+        } finally {
+            setLoading(false);
         }
-        showSuccess(`Staff ${staffId} deleted successfully!`);
-        toggleRefresh(true);
-        setDeleteStaff(0);
-        setTimeout(
-            () => {
-                setLoading(false);
-            },
-            4000
-        )
     }
     return (
         <div className={'grid grid-cols-[repeat(auto-fill,150px)] w-full gap-4'}>
@@ -55,7 +61,7 @@ function StaffGrid({staffList, toggleRefresh}: Props) {
                         onMouseLeave={() => setHoveredStaff(0)}
                         key={staff.Id}
                         className="player-card bg-[#131724] border-8 border-[#353d60] rounded-[12px] flex flex-col w-full relative">
-                        {hoveredStaff === staff.Id && staff.Role !== "ADMIN" && (
+                        {hoveredStaff === staff.Id && staff.Role !== "ADMIN" && userRole === "ADMIN" ? (
                             <button
                                 onClick={() =>
                                     setDeleteStaff(staff.Id)
@@ -65,7 +71,7 @@ function StaffGrid({staffList, toggleRefresh}: Props) {
                             >
                                 <Trash2 className="w-5 h-5 text-white"/>
                             </button>
-                        )}
+                        ) : null}
                         <div
                             className={"text-center px-2 py-3 truncate inline overflow-hidden text-md font-bold w-full border-b-8 border-[#353d60]"}>
                             {staff.Username}
