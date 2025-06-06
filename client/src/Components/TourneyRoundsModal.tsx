@@ -139,6 +139,8 @@ export function TourneyRoundsModal() {
     }
     const [roundsList, setRoundsList] = useState<RoundInfo[]>([]);
     const [refresh, setRefresh] = useState<boolean>(false);
+    const handleDelete = async (roundAcronym: string) => {
+    }
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;

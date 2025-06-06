@@ -82,11 +82,11 @@ interface fetchRescheduleRequestArgs {
     signal: AbortSignal;
     matchId?: number;
     playerRequestId?: number;
-    playerResponseId?: number;
+    playerRespondId?: number;
     status?: string;
 }
 
-export const fetchRescheduleRequests = async ({signal, playerRequestId, playerResponseId, status, matchId}: fetchRescheduleRequestArgs) => {
+export const fetchRescheduleRequests = async ({signal, playerRequestId, playerRespondId, status, matchId}: fetchRescheduleRequestArgs) => {
     try {
         let query = '';
         if (matchId) {
@@ -95,8 +95,8 @@ export const fetchRescheduleRequests = async ({signal, playerRequestId, playerRe
         if (playerRequestId) {
             query += `${query ? '&' : '?'}playerRequestId=${playerRequestId}`;
         }
-        if (playerResponseId) {
-            query += `${query ? '&' : '?'}playerResponseId=${playerResponseId}`;
+        if (playerRespondId) {
+            query += `${query ? '&' : '?'}playerRespondId=${playerRespondId}`;
         }
         if (status) {
             query += `${query ? '&' : '?'}status=${status}`;
