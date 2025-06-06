@@ -1,35 +1,61 @@
 import {AnimatePresence, motion} from "motion/react";
 import {useState} from "react";
+import {useToast} from "../context/ToastContext.tsx";
 
 interface Props {
     closeAddRoundModal: () => void;
-    showMainModal: () => void;
-    closeMainModal: () => void;
+    setRefresh: (refresh: boolean) => void;
 }
 
-export function AddRoundModal({closeAddRoundModal, showMainModal, closeMainModal}: Props) {
+export function AddRoundModal({closeAddRoundModal, setRefresh}: Props) {
     const [roundName, setRoundName] = useState("");
     const [roundAcronym, setRoundAcronym] = useState("");
-    const handleSubmit = (e: React.FormEvent) => {
+    const {showSuccess, showError} = useToast();
+    const [loading, setLoading] = useState(false);
+    const handleSubmit = async (e: React.FormEvent) => {
+        setLoading(true);
         e.preventDefault();
-        // Here you would typically handle the form submission, e.g., send data to the server
-        console.log("Round Name:", roundName);
-        console.log("Round Acronym:", roundAcronym);
-        closeAddRoundModal();
-        showMainModal();
-        closeMainModal();
+        const response = await fetch('http://localhost:3001/api/round/add',{
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                Round: roundName,
+                Acronym: roundAcronym,
+            }),
+        })
+        if (!response.ok) {
+            const errorData = await response.json();
+            showError(`Error: ${errorData.message}`);
+        } else {
+            showSuccess(`Round ${roundName} added successfully!`);
+            setRefresh(true);
+            closeAddRoundModal();
+        }
+        setLoading(false);
         // Reset form fields
         setRoundName("");
         setRoundAcronym("");
     };
     return (
         <AnimatePresence>
+            <motion.div
+                initial={{opacity: 0}}
+                animate={{opacity: 0.6}}
+                exit={{opacity: 0}}
+                className="fixed inset-0 bg-gray-700 blur-l z-40"
+                onClick={() => {
+                    closeAddRoundModal()
+                }}
+            />
             {/* Modal */}
             <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                initial={{opacity: 0, scale: 0.9, y: 20}}
+                animate={{opacity: 1, scale: 1, y: 0}}
+                exit={{opacity: 0, scale: 0.9, y: 20}}
+                transition={{type: "spring", damping: 25, stiffness: 300}}
                 className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
             >
                 <h2 className="text-xl font-semibold mb-4 text-white">Add Round</h2>
@@ -42,6 +68,7 @@ export function AddRoundModal({closeAddRoundModal, showMainModal, closeMainModal
                             <input
                                 type="text"
                                 id="beatmapId"
+                                maxLength={16}
                                 value={roundName}
                                 onChange={(e) => setRoundName(e.target.value)}
                                 className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
@@ -57,6 +84,7 @@ export function AddRoundModal({closeAddRoundModal, showMainModal, closeMainModal
                             <input
                                 type="text"
                                 id="roundAcronym"
+                                maxLength={4}
                                 value={roundAcronym}
                                 onChange={(e) => setRoundAcronym(e.target.value)}
                                 className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
@@ -70,15 +98,14 @@ export function AddRoundModal({closeAddRoundModal, showMainModal, closeMainModal
                             type="button"
                             onClick={() => {
                                 closeAddRoundModal();
-                                showMainModal();
                             }}
-                            className="text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors cursor-pointer"
+                            className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors `}
+                            className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                         >
                             Confirm
                         </button>

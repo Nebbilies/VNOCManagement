@@ -12,9 +12,13 @@ function Toast({message, type, onClose}: Props) {
     const [showPrompt, setShowPrompt] = useState(true);
 
     useEffect(() => {
+        setShowPrompt(true);
+    }, []);
+
+    useEffect(() => {
         const timer = setTimeout(() => {
             setShowPrompt(false);
-            setTimeout(() => onClose(), 2000);
+            setTimeout(() => onClose(), 500);
         }, 3000);
 
         return () => clearTimeout(timer);
@@ -26,7 +30,7 @@ function Toast({message, type, onClose}: Props) {
     const title = isSuccess ? 'Success' : 'Error';
 
     return (
-        <AnimatePresence>
+        <AnimatePresence mode={'wait'}>
             {showPrompt && (
                 <motion.div
                     initial={{opacity: 0, x: 400}}

@@ -10,6 +10,10 @@ export interface Player {
 
 export type PlayerData = Player[]
 
+const sortPlayersByRank = (players: PlayerData) => {
+    return players.sort((a,b) => a.Rank - b.Rank);
+}
+
 function PlayersComponent() {
     const [playerData, setPlayerData] = useState<PlayerData>([]);
     const [playerSearch, setPlayerSearch] = useState("")
@@ -20,8 +24,9 @@ function PlayersComponent() {
         const signal = abortController.signal;
         fetchPlayers(signal)
             .then((data: PlayerData) => {
+                data = sortPlayersByRank(data);
                 setPlayerData(data);
-                setFilteredPlayerData(data); // Initialize filtered data with all players
+                setFilteredPlayerData(data);
             })
             .finally(() => {
                 setRefresh(false);
@@ -47,7 +52,7 @@ function PlayersComponent() {
     };
     return (
         <div className={"mappool-container flex flex-col items-center max-w-screen h-auto px-4 lg:px-8 " +
-            "mt-20 lg:mt-40 mb-20 pt-10 pb-10 md:mx-12 lg:mx-28 xl:mx-40 mx-4 self-center text-white bg-gray-900/50 rounded-3xl"}>
+            "mt-20 lg:mt-30 mb-20 pt-10 pb-10 md:mx-12 lg:mx-28 xl:mx-40 mx-4 self-center text-white bg-gray-900/50 rounded-3xl"}>
             <div className={"mappool-header flex flex-col w-full lg:text-5xl md:text-4xl text-3xl font-black items-center justify-center"}>
                 <div className={"mappool-header-text w-full italic text-center"}>
                     PLAYERS LIST

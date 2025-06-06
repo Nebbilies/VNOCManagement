@@ -1,17 +1,37 @@
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import checkValidDateTime from "../lib/checkValidDateTime.ts";
 import {AnimatePresence, motion} from "motion/react";
 import {CalendarClock} from 'lucide-react';
+import {useToast} from "../context/ToastContext.tsx";
+import {MatchesContext} from "../context/MatchesContext.tsx";
 
-function RescheduleButton() {
+interface Props {
+    matchId: string;
+}
+
+function RescheduleButton({matchId}: Props) {
+    const { rescheduleRequests } = useContext(MatchesContext);
+    const { showSuccess, showError } = useToast();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [reason, setReason] = useState<string>();
+    const [reasonLength, setReasonLength] = useState<number>(0);
     const [newMatchDate, setNewMatchDate] = useState(new Date().toISOString().slice(0, 10));
     const [newMatchTime, setNewMatchTime] = useState(new Date().toISOString().slice(11, 16));
     const [dateTimeError, setDateTimeError] = useState<boolean>(false);
     const [hoveringReschedule, setHoveringReschedule] = useState<boolean>(false);
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const openModal = () => {
+        if (rescheduleRequests.find((req) => req.MatchId === matchId && !['ACCEPTED', 'REJECTED'].includes(req.Status))) {
+            showError("You already have a pending reschedule request for this match.");
+            return;
+        }
+        setIsModalOpen(true);
+    }
+    const closeModal = () =>
+    {
+        setIsModalOpen(false);
+        setLoading(false);
+    }
     useEffect(() => {
         if (!checkValidDateTime(newMatchDate, newMatchTime)) {
             setDateTimeError(true);
@@ -19,10 +39,31 @@ function RescheduleButton() {
             setDateTimeError(false);
         }
     }, [newMatchDate, newMatchTime])
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        setLoading(true);
+        const data = JSON.stringify({
+            reason: reason,
+            matchId: matchId,
+            newDate: newMatchDate,
+            newTime: newMatchTime,
+        })
+        const response = await fetch('http://localhost:3001/api/resch/add', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: data
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            showError(`Error: ${errorData.error}`);
+        } else {
+            showSuccess(`Successfully initiated reschedule request for match ${matchId}`);
+            setIsModalOpen(false);
+        }
+        setLoading(false);
     };
 
     return (
@@ -80,11 +121,19 @@ function RescheduleButton() {
                                     <div className={'flex'}>
                                         <textarea
                                             id="reason"
+                                            maxLength={100}
                                             value={reason}
-                                            onChange={(e) => setReason(e.target.value)}
+                                            onChange={(e) =>
+                                            {
+                                                setReason(e.target.value)
+                                                setReasonLength(e.target.value.length)
+                                            }}
                                             className="w-full p-2 h-36 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white text-wrap"
                                             required
                                         />
+                                    </div>
+                                    <div className="text-gray-400 text-sm font-normal mt-1">
+                                        {reasonLength}/100 characters
                                     </div>
                                 </div>
 
@@ -131,13 +180,13 @@ function RescheduleButton() {
                                     <button
                                         type="button"
                                         onClick={closeModal}
-                                        className="text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors cursor-pointer"
+                                        className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'} `}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${dateTimeError ? 'cursor-not-allowed opacity-50' : ''}`}
+                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${dateTimeError || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                                     >
                                         Confirm
                                     </button>

@@ -7,7 +7,8 @@ import {ManageMatchButton} from "./ManageMatchButton.tsx";
 import {Staff} from "./StaffComponent.tsx";
 import {useState, useEffect} from "react";
 import {Loading} from "./Loading.tsx";
-import {fetchMatches, fetchPlayers, fetchRounds} from "../lib/fetchFunctions.tsx"
+import {fetchMatches, fetchPlayers, fetchRescheduleRequests, fetchRounds} from "../lib/fetchFunctions.tsx"
+import {useToast} from "../context/ToastContext.tsx";
 
 export interface Match {
     id: string;
@@ -29,17 +30,29 @@ export interface ReactSelectOptions {
 
 export type MatchData = Match[]
 
+export interface RescheduleRequest {
+    Id: number;
+    MatchId: string;
+    NewTime: string;
+    Reason: string;
+    Status: string;
+    PlayerRequest: Player;
+    PlayerRespond: Player;
+}
+
 const sortMatchesByTime = (matches: MatchData): MatchData => {
     return matches.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 }
 
 function MatchesComponent() {
+    const {showError} = useToast();
     const [matchData, setMatchData] = useState<MatchData>([])
     const [fetchingData, setFetchingData] = useState<boolean>(true)
     const [refresh, setRefresh] = useState<boolean>(false);
     const [playerOptions, setPlayerOptions] = useState<ReactSelectOptions[]>([]);
     const [roundsList, setRoundsList] = useState<RoundInfo[]>([]);
     const [currentRound, setCurrentRound] = useState<string>("");
+    const [rescheduleRequests, setRescheduleRequests] = useState<RescheduleRequest[]>([]);
     const [filteredMatches, setFilteredMatches] = useState<MatchData>([]);
     useEffect(() => {
         const abortController = new AbortController();
@@ -48,6 +61,11 @@ function MatchesComponent() {
         fetchMatches(signal)
             .then((data: MatchData) => {
                 setMatchData(sortMatchesByTime(data));
+            })
+            .catch((error) => {
+                if (error.name !== 'AbortError') {
+                    console.error("Error fetching matches:", error);
+                }
             })
             .finally(() => {
                 setFetchingData(false);
@@ -62,8 +80,11 @@ function MatchesComponent() {
                 setPlayerOptions(options);
             })
             .catch((error) => {
-                console.error("Error fetching players:", error);
-            });
+                if (error.name !== 'AbortError') {
+                    console.error("Error fetching matches:", error);
+                    showError("Error fetching players. Please refresh or try again later.");
+                }
+            })
         fetchRounds(signal)
             .then((data: RoundInfo[]) => {
                 setRoundsList(data);
@@ -72,7 +93,18 @@ function MatchesComponent() {
                 }
             })
             .catch((error) => {
-                console.error("Error fetching rounds:", error);
+                if (error.name !== 'AbortError') {
+                    console.error("Error fetching matches:", error);
+                }
+            })
+        fetchRescheduleRequests({signal})
+            .then((data: RescheduleRequest[]) => {
+                setRescheduleRequests(data);
+            })
+            .catch((error) => {
+                if (error.name !== 'AbortError') {
+                    console.error("Error fetching reschedule requests:", error);
+                }
             });
         return () => {
             abortController.abort();
@@ -131,7 +163,7 @@ function MatchesComponent() {
                     <div className={"matches-content flex flex-col w-full h-auto bg-gray-900/20 rounded-lg mt-4"}>
                         <div className={"matches-list flex flex-col w-full h-auto rounded-lg p-0 md:p-5"}>
                             {filteredMatches.length > 0 ? (
-                                <MatchesContext.Provider value={{playerOptions, roundsList, setRefresh}}>
+                                <MatchesContext.Provider value={{playerOptions, roundsList, setRefresh, rescheduleRequests}}>
                                     {filteredMatches.map((match, index) => (
                                         <MatchesContent index={index} match={match}/>
                                     ))}

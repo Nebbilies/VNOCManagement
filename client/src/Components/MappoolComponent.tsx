@@ -5,6 +5,7 @@ import {MappoolContext} from "../context/MappoolContext.tsx";
 import {Plus, Search} from "lucide-react";
 import {useToast} from "../context/ToastContext.tsx";
 import { fetchRounds, fetchMappool } from "../lib/fetchFunctions.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 interface PoolData {
     NM: MapData[],
@@ -392,6 +393,11 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
 
 
 function MappoolComponent() {
+    const {user} = useUser();
+    let userRole = 'USER';
+    if (user) {
+        userRole = user.role;
+    }
     const [roundList, setRoundList] = useState<RoundInfo[]>([]);
     const [currentRound, setCurrentRound] = useState<string>('');
     const [allMappool, setAllMappool] = useState<AllPoolData>({});
@@ -444,7 +450,10 @@ function MappoolComponent() {
                     <div className={"mappool-header-text italic lg:text-start text-center"}>
                         MAPPOOL
                     </div>
+                    {userRole === 'MAPPOOLER' || userRole === 'ADMIN' ? (
                     <AddBeatmapButton toggleRefresh={setRefresh} roundList={roundList}/>
+                        ) : ('')
+                    }
                 </div>
                 <div
                     className={"mappool-header-selection font-bold text-2xl justify-center items-center flex mt-4 gap-4"}>

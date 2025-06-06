@@ -6,6 +6,7 @@ import {AnimatePresence, motion} from "motion/react";
 import {fetchBeatmapData} from "./MappoolComponent.tsx";
 import {MappoolContext} from "../context/MappoolContext.tsx";
 import {useToast} from "../context/ToastContext.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 //good habit
 interface Props {
@@ -15,6 +16,11 @@ interface Props {
 }
 
 export default function MappoolContentCard({map, style, mod}: Props) {
+    const {user} = useUser()
+    let userRole = 'USER';
+    if (user) {
+        userRole = user.role;
+    }
     const { currentRound, setRefresh } = useContext(MappoolContext);
     const [loading, setLoading] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -41,7 +47,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
         }
     );
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const menuRef = useRef(null);
+    const menuRef = useRef<HTMLDivElement>(null);
     async function deleteBeatmap({round, mod, index}: { round: string, mod: string, index: number }) {
         setLoading(true);
         const response = await fetch(`http://localhost:3001/api/maps/delete`, {
@@ -112,8 +118,8 @@ export default function MappoolContentCard({map, style, mod}: Props) {
     }
     // Close menu on outside click
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setMenuOpen(false);
             }
         }
@@ -226,310 +232,316 @@ export default function MappoolContentCard({map, style, mod}: Props) {
                 </div>
             </div>
             {/* Controller: Edit, Delete */}
-            <div className={'relative w-1/30'}>
-            <button
-                className="mappool-content-map-item-controller w-full flex items-center justify-center cursor-pointer text-gray-400 hover:text-gray-600 transition duration-200 relative"
-                onClick={() => setMenuOpen(v => !v)}
-                aria-label="Open map options"
-            >
-                <EllipsisVertical/>
-            </button>
-            <AnimatePresence>
-                {menuOpen && (
-                    <motion.div
-                        initial={{height: 0}}
-                        animate={{height: 'auto', transition: {duration: 0.2}}}
-                        exit={{height: 0, transition: {delay: 0.2}}}
-                        transition={{ease: 'easeInOut'}}
-                        ref={menuRef}
-                        className="absolute -left-15 top-full mt-2 z-50 bg-[#0e111a] rounded-lg shadow-lg w-35 flex flex-col animate-fade-in"
+            { userRole === 'ADMIN' || userRole === 'MAPPOOLER' ? (
+                <div className={'relative w-1/30'}>
+                    <button
+                        className="mappool-content-map-item-controller w-full flex items-center justify-center cursor-pointer text-gray-400 hover:text-gray-600 transition duration-200 relative"
+                        onClick={() => setMenuOpen(v => !v)}
+                        aria-label="Open map options"
                     >
-                        <motion.button
-                            initial={{opacity: 0}}
-                            animate={{opacity: 1}}
-                            exit={{opacity: 0}}
-                            transition={{duration: 0.1, delay: 0.2}}
-                            className="px-4 pt-2 pb-1 text-left hover:bg-black w-full text-sm font-bold rounded-t-lg"
-                            onClick={() => {
-                                setMenuOpen(false);
-                                setEditingMapData({
-                                    id: map.id,
-                                    mod: mod,
-                                    idx: map.idx,
-                                })
-                                setBeatmapSearchId(map.id);
-                                setNewMapData({
-                                    id: map.id,
-                                    mod: mod,
-                                    idx: map.idx,
-                                })
-                            }}
-                        >
-                            Edit
-                        </motion.button>
-                        <motion.button
-                            initial={{opacity: 0}}
-                            animate={{
-                                opacity: 1,
-                                transition: {
-                                    duration: 0.1, delay: 0.3
-                                }
-                            }}
-                            exit={{opacity: 0}}
-                            className="px-4 pb-2 pt-1 text-left hover:bg-black text-red-600 w-full font-bold text-sm rounded-b-lg"
-                            onClick={() => {
-                                setMenuOpen(false);
-                                setIsDeleteModalOpen(true);
-                            }}
-                        >
-                            Delete
-                        </motion.button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Edit Map Modal */}
-            <AnimatePresence>
-                {editingMapData.id === map.id && (
-                    <>
-                        {/* Overlay */}
-                        <motion.div
-                            initial={{opacity: 0}}
-                            animate={{opacity: 0.6}}
-                            exit={{opacity: 0}}
-                            className="fixed inset-0 bg-gray-700 blur-l z-40"
-                            onClick={() => {
-                                setEditingMapData({
-                                    id: 0,
-                                    mod: "NM",
-                                    idx: 0,
-                                })
-                            }}
-                        />
-
-                        {/* Modal */}
-                        <motion.div
-                            initial={{opacity: 0, scale: 0.9, y: 20}}
-                            animate={{opacity: 1, scale: 1, y: 0}}
-                            exit={{opacity: 0, scale: 0.9, y: 20}}
-                            transition={{type: "spring", damping: 25, stiffness: 300}}
-                            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
-                        >
-                            <h2 className="text-xl font-semibold mb-4 text-white">Add Beatmap</h2>
-                            <form onSubmit={(e) => {
-                                e.preventDefault();
-                                editBeatmap({
-                                    oldRound: currentRound,
-                                    oldMod: editingMapData.mod,
-                                    oldIndex: editingMapData.idx
-                                })
-                            }}>
-                                <div className="mb-4">
-                                    <label htmlFor="beatmapId" className="block text-sm font-medium text-white mb-1">
-                                        Beatmap ID
-                                    </label>
-                                    <div className={'flex'}>
-                                        <input
-                                            type="number"
-                                            id="beatmapId"
-                                            value={newMapData.id}
-                                            onChange={(e) => {
-                                                setNewMapData((prev => ({
-                                                    ...prev,
-                                                    id: parseInt(e.target.value)
-                                                })));
-                                            }
-                                        }
-                                            className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
-                                            required
-                                        />
-                                        <div
-                                            className={`bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1 ${searchLoading ? 'pointer-event-none opacity-50' : 'cursor-pointer'}`}
-                                            onClick={() => {
-                                                setBeatmapSearchId(newMapData.id);
-                                            }}
-                                        >
-                                            {searchLoading ? (
-                                                //Loading Spinner
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
-                                                     viewBox="0 0 24 24">
-                                                    <path fill="currentColor"
-                                                          d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z"
-                                                          opacity="0.5"/>
-                                                    <path fill="currentColor"
-                                                          d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z">
-                                                        <animateTransform attributeName="transform" dur="1s"
-                                                                          from="0 12 12" repeatCount="indefinite"
-                                                                          to="360 12 12" type="rotate"/>
-                                                    </path>
-                                                </svg>
-                                            ) : (
-                                                <Search className={'w-[30px] w-[30px]'}/>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* Beatmap Search Result */
-                                    //--------------------
-                                    //--------------------
-                                    // REMEMBER TO CHECK FOR ADDITIONAL CONDITIONS WHEN BACKEND FINISHES
-                                    // 1. MAKE MAPPOOL NAME A DROP DOWN OF ROUNDS
-                                    // 2. CHECK IF SLOT NAME EXISTS IN MAPPOOL
-                                    //---------------------
-                                    //--------------------
-                                }
-                                {beatmapSearchData.returnCode === 404 ? (
-                                    <div className="text-red-500 text-sm">
-                                        Beatmap not found
-                                    </div>
-                                ) : null}
-                                {beatmapSearchData.returnCode === 200 ? (
-                                    <>
-                                        <div className={'w-full text-white text-lg font-bold mb-2 mt-4'}>
-                                            Submitting beatmap:
-                                        </div>
-                                    <div
-                                        className={`mappool-content-map-item flex w-full rounded-3xl text-black h-20 font-bold items-center bg-center bg-cover bg-white/70 sm:bg-white/90 border-2 border-white `}
-                                        style={{
-                                            backgroundImage: `url('https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg')`,
-                                            backgroundBlendMode: 'overlay'
-                                        }}>
-                                        <img
-                                            className={`object-cover h-full w-auto sm:flex hidden rounded-r-3xl rounded-l-3xl`}
-                                            src={`https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg`}
-                                            alt={'bg'}/>
-                                        <div
-                                            className={`mappool-content-map-item-info flex flex-col w-7/12 h-full px-3 justify-start text-start overflow-hidden`}
-                                        >
-                                            <div
-                                                className={'mappool-content-map-item-info-name text-lg font-bold truncate inline'}>
-                                                {beatmapSearchData.title}
-                                            </div>
-                                            <div
-                                                className={`mappool-content-map-item-info-artist  w-full text-xs font-normal truncate`}>
-                                                {beatmapSearchData.artist}
-                                            </div>
-                                            <div
-                                                className={'mappool-content-map-item-info-mapper flex w-full text-xs font-bold mt-3 truncate'}>
-                                                {beatmapSearchData.difficulty}
-                                            </div>
-                                        </div>
-                                    </div>
-                    </>
-                                ) : null}
-
-                                {/* Mappool Name and Slot Name */}
-                                <div className="flex gap-4 mt-4 mb-6">
-                                    <div className="w-1/2">
-                                        <label htmlFor="mod" className="block text-sm font-medium text-white mb-1">
-                                            Mod
-                                        </label>
-                                        <select
-                                            id="mod"
-                                            value={newMapData.mod}
-                                            onChange={(e) => setNewMapData(
-                                                (prev) => ({...prev, mod: e.target.value})
-                                            )}
-                                            className="w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"
-                                            required>
-                                            <option value="NM">NM</option>
-                                            <option value="HD">HD</option>
-                                            <option value="HR">HR</option>
-                                            <option value="DT">DT</option>
-                                            <option value="TB">TB</option>
-                                        </select>
-                                    </div>
-                                    <div className="w-1/2">
-                                        <label htmlFor="slotName" className="block text-sm font-medium text-white mb-1">
-                                            Slot Name
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            max="9"
-                                            id="slotName"
-                                            value={newMapData.idx}
-                                            onChange={(e) => setNewMapData(
-                                                (prev) => ({...prev, idx: parseInt(e.target.value)})
-                                            )}
-                                            className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-center gap-2 w-full h-12">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setEditingMapData({
-                                                id: 0,
-                                                mod: "NM",
-                                                idx: 0,
-                                            })
-                                        }}
-                                        className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'pointer-event-none opacity-50' : 'cursor-pointer'}`}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${beatmapSearchData.returnCode === 200 && !loading ? 'cursor-pointer' : "pointer-event-none opacity-50"} `}
-                                    >
-                                        Confirm
-                                    </button>
-                                </div>
-                            </form>
-                        </motion.div>
-                    </>
-                )}
-                {/* Delete Map Modal */}
-                {isDeleteModalOpen && (
-                    <>
-                        <motion.div
-                            initial={{opacity: 0}}
-                            animate={{opacity: 0.6}}
-                            exit={{opacity: 0}}
-                            className="fixed inset-0 bg-gray-600 blur-xl z-40"
-                            onClick={() => setIsDeleteModalOpen(false)}
-                        />
-                        <motion.div
-                            initial={{opacity: 0, scale: 0.9, y: 20}}
-                            animate={{opacity: 1, scale: 1, y: 0}}
-                            exit={{opacity: 0, scale: 0.9, y: 20}}
-                            transition={{type: "spring", damping: 25, stiffness: 300}}
-                            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
-                        >
-                            <h2 className="text-xl font-semibold mb-4 text-white">Delete Map</h2>
-                            <div className="text-white mb-4">
-                                Are you sure you want to delete this map?
-                            </div>
-                            <div className="flex gap-3 w-full h-12">
-                                <div
-                                    onClick={() => setIsDeleteModalOpen(false)}
-                                    className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 flex items-center font-bold ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
-                                >
-                                    Cancel
-                                </div>
-                                <div
-                                    className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 flex items-center font-bold ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                        <EllipsisVertical/>
+                    </button>
+                    <AnimatePresence>
+                        {menuOpen && (
+                            <motion.div
+                                initial={{height: 0}}
+                                animate={{height: 'auto', transition: {duration: 0.2}}}
+                                exit={{height: 0, transition: {delay: 0.2}}}
+                                transition={{ease: 'easeInOut'}}
+                                ref={menuRef}
+                                className="absolute -left-15 top-full mt-2 z-50 bg-[#0e111a] rounded-lg shadow-lg w-35 flex flex-col animate-fade-in"
+                            >
+                                <motion.button
+                                    initial={{opacity: 0}}
+                                    animate={{opacity: 1}}
+                                    exit={{opacity: 0}}
+                                    transition={{duration: 0.1, delay: 0.2}}
+                                    className="px-4 pt-2 pb-1 text-left hover:bg-black w-full text-sm font-bold rounded-t-lg"
                                     onClick={() => {
-                                        // Handle delete logic here
-                                        deleteBeatmap({
-                                            round: currentRound,
+                                        setMenuOpen(false);
+                                        setEditingMapData({
+                                            id: map.id,
                                             mod: mod,
-                                            index: map.idx
+                                            idx: map.idx,
+                                        })
+                                        setBeatmapSearchId(map.id);
+                                        setNewMapData({
+                                            id: map.id,
+                                            mod: mod,
+                                            idx: map.idx,
                                         })
                                     }}
                                 >
-                                    Confirm
-                                </div>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-            </div>
+                                    Edit
+                                </motion.button>
+                                <motion.button
+                                    initial={{opacity: 0}}
+                                    animate={{
+                                        opacity: 1,
+                                        transition: {
+                                            duration: 0.1, delay: 0.3
+                                        }
+                                    }}
+                                    exit={{opacity: 0}}
+                                    className="px-4 pb-2 pt-1 text-left hover:bg-black text-red-600 w-full font-bold text-sm rounded-b-lg"
+                                    onClick={() => {
+                                        setMenuOpen(false);
+                                        setIsDeleteModalOpen(true);
+                                    }}
+                                >
+                                    Delete
+                                </motion.button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Edit Map Modal */}
+                    <AnimatePresence>
+                        {editingMapData.id === map.id && (
+                            <>
+                                {/* Overlay */}
+                                <motion.div
+                                    initial={{opacity: 0}}
+                                    animate={{opacity: 0.6}}
+                                    exit={{opacity: 0}}
+                                    className="fixed inset-0 bg-gray-700 blur-l z-40"
+                                    onClick={() => {
+                                        setEditingMapData({
+                                            id: 0,
+                                            mod: "NM",
+                                            idx: 0,
+                                        })
+                                    }}
+                                />
+
+                                {/* Modal */}
+                                <motion.div
+                                    initial={{opacity: 0, scale: 0.9, y: 20}}
+                                    animate={{opacity: 1, scale: 1, y: 0}}
+                                    exit={{opacity: 0, scale: 0.9, y: 20}}
+                                    transition={{type: "spring", damping: 25, stiffness: 300}}
+                                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
+                                >
+                                    <h2 className="text-xl font-semibold mb-4 text-white">Add Beatmap</h2>
+                                    <form onSubmit={(e) => {
+                                        e.preventDefault();
+                                        editBeatmap({
+                                            oldRound: currentRound,
+                                            oldMod: editingMapData.mod,
+                                            oldIndex: editingMapData.idx
+                                        })
+                                    }}>
+                                        <div className="mb-4">
+                                            <label htmlFor="beatmapId"
+                                                   className="block text-sm font-medium text-white mb-1">
+                                                Beatmap ID
+                                            </label>
+                                            <div className={'flex'}>
+                                                <input
+                                                    type="number"
+                                                    id="beatmapId"
+                                                    value={newMapData.id}
+                                                    onChange={(e) => {
+                                                        setNewMapData((prev => ({
+                                                            ...prev,
+                                                            id: parseInt(e.target.value)
+                                                        })));
+                                                    }
+                                                    }
+                                                    className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
+                                                    required
+                                                />
+                                                <div
+                                                    className={`bg-gray-900/20 text-white text-2xl rounded w-1/6 hover:bg-gray-700 transition-colors flex justify-center items-center ml-2 border-white border-1 ${searchLoading ? 'pointer-event-none opacity-50' : 'cursor-pointer'}`}
+                                                    onClick={() => {
+                                                        setBeatmapSearchId(newMapData.id);
+                                                    }}
+                                                >
+                                                    {searchLoading ? (
+                                                        //Loading Spinner
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
+                                                             viewBox="0 0 24 24">
+                                                            <path fill="currentColor"
+                                                                  d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z"
+                                                                  opacity="0.5"/>
+                                                            <path fill="currentColor"
+                                                                  d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z">
+                                                                <animateTransform attributeName="transform" dur="1s"
+                                                                                  from="0 12 12"
+                                                                                  repeatCount="indefinite"
+                                                                                  to="360 12 12" type="rotate"/>
+                                                            </path>
+                                                        </svg>
+                                                    ) : (
+                                                        <Search className={'w-[30px] w-[30px]'}/>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Beatmap Search Result */
+                                            //--------------------
+                                            //--------------------
+                                            // REMEMBER TO CHECK FOR ADDITIONAL CONDITIONS WHEN BACKEND FINISHES
+                                            // 1. MAKE MAPPOOL NAME A DROP DOWN OF ROUNDS
+                                            // 2. CHECK IF SLOT NAME EXISTS IN MAPPOOL
+                                            //---------------------
+                                            //--------------------
+                                        }
+                                        {beatmapSearchData.returnCode === 404 ? (
+                                            <div className="text-red-500 text-sm">
+                                                Beatmap not found
+                                            </div>
+                                        ) : null}
+                                        {beatmapSearchData.returnCode === 200 ? (
+                                            <>
+                                                <div className={'w-full text-white text-lg font-bold mb-2 mt-4'}>
+                                                    Submitting beatmap:
+                                                </div>
+                                                <div
+                                                    className={`mappool-content-map-item flex w-full rounded-3xl text-black h-20 font-bold items-center bg-center bg-cover bg-white/70 sm:bg-white/90 border-2 border-white `}
+                                                    style={{
+                                                        backgroundImage: `url('https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg')`,
+                                                        backgroundBlendMode: 'overlay'
+                                                    }}>
+                                                    <img
+                                                        className={`object-cover h-full w-auto sm:flex hidden rounded-r-3xl rounded-l-3xl`}
+                                                        src={`https://assets.ppy.sh/beatmaps/${beatmapSearchData.id}/covers/raw.jpg`}
+                                                        alt={'bg'}/>
+                                                    <div
+                                                        className={`mappool-content-map-item-info flex flex-col w-7/12 h-full px-3 justify-start text-start overflow-hidden`}
+                                                    >
+                                                        <div
+                                                            className={'mappool-content-map-item-info-name text-lg font-bold truncate inline'}>
+                                                            {beatmapSearchData.title}
+                                                        </div>
+                                                        <div
+                                                            className={`mappool-content-map-item-info-artist  w-full text-xs font-normal truncate`}>
+                                                            {beatmapSearchData.artist}
+                                                        </div>
+                                                        <div
+                                                            className={'mappool-content-map-item-info-mapper flex w-full text-xs font-bold mt-3 truncate'}>
+                                                            {beatmapSearchData.difficulty}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : null}
+
+                                        {/* Mappool Name and Slot Name */}
+                                        <div className="flex gap-4 mt-4 mb-6">
+                                            <div className="w-1/2">
+                                                <label htmlFor="mod"
+                                                       className="block text-sm font-medium text-white mb-1">
+                                                    Mod
+                                                </label>
+                                                <select
+                                                    id="mod"
+                                                    value={newMapData.mod}
+                                                    onChange={(e) => setNewMapData(
+                                                        (prev) => ({...prev, mod: e.target.value})
+                                                    )}
+                                                    className="w-full p-[8.7px] border border-gray-300 font-normal text-xl rounded focus:ring-blue-500 bg-[#23263a] focus:border-blue-500"
+                                                    required>
+                                                    <option value="NM">NM</option>
+                                                    <option value="HD">HD</option>
+                                                    <option value="HR">HR</option>
+                                                    <option value="DT">DT</option>
+                                                    <option value="TB">TB</option>
+                                                </select>
+                                            </div>
+                                            <div className="w-1/2">
+                                                <label htmlFor="slotName"
+                                                       className="block text-sm font-medium text-white mb-1">
+                                                    Slot Name
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    max="9"
+                                                    id="slotName"
+                                                    value={newMapData.idx}
+                                                    onChange={(e) => setNewMapData(
+                                                        (prev) => ({...prev, idx: parseInt(e.target.value)})
+                                                    )}
+                                                    className="w-full p-2 border border-gray-300 font-normal text-xl rounded focus:ring-violet-500 focus:border-violet-500 text-white"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-center gap-2 w-full h-12">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setEditingMapData({
+                                                        id: 0,
+                                                        mod: "NM",
+                                                        idx: 0,
+                                                    })
+                                                }}
+                                                className={`text-gray-700 text-2xl bg-gray-200 w-1/2 h-full rounded hover:bg-gray-300 transition-colors ${loading ? 'pointer-event-none opacity-50' : 'cursor-pointer'}`}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${beatmapSearchData.returnCode === 200 && !loading ? 'cursor-pointer' : "pointer-event-none opacity-50"} `}
+                                            >
+                                                Confirm
+                                            </button>
+                                        </div>
+                                    </form>
+                                </motion.div>
+                            </>
+                        )}
+                        {/* Delete Map Modal */}
+                        {isDeleteModalOpen && (
+                            <>
+                                <motion.div
+                                    initial={{opacity: 0}}
+                                    animate={{opacity: 0.6}}
+                                    exit={{opacity: 0}}
+                                    className="fixed inset-0 bg-gray-600 blur-xl z-40"
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                />
+                                <motion.div
+                                    initial={{opacity: 0, scale: 0.9, y: 20}}
+                                    animate={{opacity: 1, scale: 1, y: 0}}
+                                    exit={{opacity: 0, scale: 0.9, y: 20}}
+                                    transition={{type: "spring", damping: 25, stiffness: 300}}
+                                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
+                                >
+                                    <h2 className="text-xl font-semibold mb-4 text-white">Delete Map</h2>
+                                    <div className="text-white mb-4">
+                                        Are you sure you want to delete this map?
+                                    </div>
+                                    <div className="flex gap-3 w-full h-12">
+                                        <div
+                                            onClick={() => setIsDeleteModalOpen(false)}
+                                            className={`px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 flex items-center font-bold ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                                        >
+                                            Cancel
+                                        </div>
+                                        <div
+                                            className={`px-4 py-2 bg-red-600 rounded hover:bg-red-700 flex items-center font-bold ${loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                                            onClick={() => {
+                                                // Handle delete logic here
+                                                deleteBeatmap({
+                                                    round: currentRound,
+                                                    mod: mod,
+                                                    index: map.idx
+                                                })
+                                            }}
+                                        >
+                                            Confirm
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+                </div>
+            ) : null}
         </div>
     )
 }
