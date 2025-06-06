@@ -11,7 +11,7 @@ export function AddStaffButton({toggleRefresh}: Props) {
     const [HoveringAddStaff, setHoveringAddStaff] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [userId, setUserId] = useState<number>();
-    const [position, setPosition] = useState<string>('ADMIN');
+    const [position, setPosition] = useState<string>('REFEREE');
     const [loading, setLoading] = useState(false);
     const {showSuccess, showError} = useToast();
     const openModal = () => {
@@ -19,7 +19,7 @@ export function AddStaffButton({toggleRefresh}: Props) {
     }
     const closeModal = () => {
         setIsModalOpen(false);
-        setPosition('ADMIN');
+        setPosition('REFEREE');
     };
     const handleSubmit = async (e: React.FormEvent) => {
         setLoading(true);
@@ -100,7 +100,7 @@ export function AddStaffButton({toggleRefresh}: Props) {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-96"
+                            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-10/11 sm:w-96"
                         >
                             <h2 className="text-xl font-semibold mb-4 text-white">Add Staff</h2>
 

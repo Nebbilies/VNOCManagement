@@ -12,7 +12,7 @@ export const MappoolContext = createContext<MappoolContextType>({
     mappool: { DT: [], HD: [], HR: [], NM: [], TB: [] },
     currentRound: '',
     refresh: false,
-    setRefresh: () => {}, // does nothing by default :3
+    setRefresh: () => {},
 });
 
 

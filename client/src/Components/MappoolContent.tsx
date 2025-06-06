@@ -38,18 +38,18 @@ export interface MapData {
 
 
 function MappoolContent() {
-    const mappoolData = useContext(MappoolContext);
+    const {mappool} = useContext(MappoolContext);
     const [mappoolIsEmpty, setMappoolIsEmpty] = useState(false);
     const isMappoolEmpty = (mappool: PoolData): boolean => {
         return Object.values(mappool).every(category => category.length === 0);
     };
     useEffect(() => {
-        if (isMappoolEmpty(mappoolData)) {
+        if (isMappoolEmpty(mappool)) {
             setMappoolIsEmpty(true);
         } else {
             setMappoolIsEmpty(false);
         }
-    }, [mappoolData]);
+    }, [mappool]);
     return (
         <div className={"mappool-content flex flex-col w-full mt-5"}>
             {mappoolIsEmpty ? (

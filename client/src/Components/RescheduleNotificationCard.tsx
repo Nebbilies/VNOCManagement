@@ -74,7 +74,7 @@ function RescheduleNotificationCard({rescheduleNotification, setRefresh}: Props)
                             animate={{opacity: 1, scale: 1, y: 0}}
                             exit={{opacity: 0, scale: 0.9, y: 20}}
                             transition={{type: "spring", damping: 25, stiffness: 300}}
-                            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-112"
+                            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-10/11 sm:w-112"
                         >
                             <h2 className="text-xl font-semibold mb-4 text-white">Reschedule Request</h2>
 

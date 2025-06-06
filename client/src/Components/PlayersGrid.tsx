@@ -158,7 +158,7 @@ function PlayersGrid({playerData, toggleRefresh}: Props) {
                                     animate={{opacity: 1, scale: 1, y: 0}}
                                     exit={{opacity: 0, scale: 0.9, y: 20}}
                                     transition={{type: "spring", damping: 25, stiffness: 300}}
-                                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg p-6 z-50 w-96"
+                                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg p-6 z-50 sm:w-96 w-10/11"
                                 >
                                     <div className="bg-[#23263a] rounded-lg p-6 text-white">
                                         <div>Are you sure you want to delete <b>{player.Username}</b>?</div>

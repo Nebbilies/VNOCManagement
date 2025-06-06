@@ -3,6 +3,7 @@ import {useContext, useState} from 'react';
 import {AnimatePresence, motion} from "motion/react";
 import {useToast} from "../context/ToastContext.tsx";
 import {MatchesContext} from "../context/MatchesContext.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 interface Props  {
     matchId: string
@@ -14,8 +15,11 @@ export function ClaimMatchButton({ matchId }: Props) {
     const [hoveringClaimMatch, setHoveringClaimMatch] = useState(false);
     const {showSuccess, showError} = useToast();
     const { setRefresh } = useContext(MatchesContext)
-    let user = localStorage.getItem("user") || null;
-    user = user ? JSON.parse(user) : null;
+    const {user} = useUser()
+    let userRole = "";
+    if (user) {
+        userRole = user.role;
+    }
 
     const handleClaim = async () => {
         setLoading(true);
@@ -87,7 +91,7 @@ export function ClaimMatchButton({ matchId }: Props) {
                             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg p-6 z-50 w-96"
                         >
                             <div className="bg-[#23263a] rounded-lg p-6 text-white">
-                                <div>Are you sure you want to claim match <b>{matchId}</b> {user ? "as " + user.role : ""}?</div>
+                                <div>Are you sure you want to claim match <b>{matchId}</b> {user ? "as " + userRole : ""}?</div>
                                 <div className="mt-4 flex gap-3">
                                     <button onClick={() => setShowModal(false)}
                                             className="px-4 py-2 bg-gray-500 rounded hover:bg-gray-600 cursor-pointer">Cancel

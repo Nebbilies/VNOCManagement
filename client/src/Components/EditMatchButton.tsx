@@ -126,7 +126,7 @@ export function EditMatchButton({currentMatch}: Props) {
                             transition={{type: "spring", damping: 25, stiffness: 300}}
                             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-112"
                         >
-                            <h2 className="text-xl font-semibold mb-4 text-white">Add Match</h2>
+                            <h2 className="text-xl font-semibold mb-4 text-white">Edit Match</h2>
 
                             <form onSubmit={handleSubmit}>
                                 {/* Players' ID */}
