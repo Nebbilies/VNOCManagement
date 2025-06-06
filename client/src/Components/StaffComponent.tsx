@@ -26,7 +26,6 @@ function StaffComponent() {
     const [loading, setLoading] = useState<boolean>(true);
     useEffect(() => {
         fetch("http://localhost:3001/api/staff/all", {
-            credentials: "include",
         })
             .then((res) => {
                 if (!res.ok) throw new Error("Failed to fetch staff");

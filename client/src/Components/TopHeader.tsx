@@ -3,6 +3,7 @@ import {motion} from "motion/react";
 import {useState, useEffect} from "react";
 import {LogOut} from  "lucide-react";
 import {handleLogOut} from "./Header.tsx";
+import NotificationButton from "./NotificationButton.tsx";
 
 // Define the type for the props
 interface Props {
@@ -31,7 +32,7 @@ function TopHeader({links, logo}: Props) {
     const user = JSON.parse(window.localStorage.getItem("user") || "null");
     return (
         <motion.div
-            className={` ${visible ? '' : '-translate-y-18'} bg-[#1b1d20]/50 text-white fixed z-999 duration-500 h-16 font-bold lg:text-xl left-0 top-0 text-md items-center justify-between w-screen border-violet-300 border-b-2 hidden lg:flex px-4 md:px-48 lg:px-64 shadow-violet-400/20 shadow-md`}>
+            className={` ${visible ? '' : '-translate-y-18'} bg-[#1b1d20]/50 text-white fixed z-999 duration-500 h-16 font-bold lg:text-xl left-0 top-0 text-md items-center justify-between w-screen border-violet-300 border-b-2 hidden lg:flex px-4 lg:px-36 xl:px-64 shadow-violet-400/20 shadow-md`}>
             <div className="flex items-center justify-center h-full">
                 <a href="/" className="flex w-auto left-3 relative">
                     <div className="w-12 h-auto">
@@ -68,7 +69,7 @@ function TopHeader({links, logo}: Props) {
                     {!user ? (
                         <Link to={"http://localhost:3001/api/auth/login"}>Login</Link>
                     ) : (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2">
                             {user.avatar_url ? (
                                 <img
                                     src={user.avatar_url}
@@ -77,12 +78,17 @@ function TopHeader({links, logo}: Props) {
                                 />
                             ) : null}
                             <span className={'text-lg'}>{user.username}</span>
+                            <div
+                                className={'ml-3 items-center flex'}>
+                                <NotificationButton mode={'pc'}/>
+                            </div>
                             <motion.div
                                 whileHover={{scale: 1.1}}
                                 whileTap={{scale: 0.9}}
                                 transition={{type: "spring", stiffness: 300, duration: 200}}
+                                className={'ml-3 cursor-pointer'}
                                 onClick={handleLogOut}>
-                                <LogOut className={'cursor-pointer w-6 h-6 ml-3'}/>
+                                <LogOut size={24}/>
                             </motion.div>
                         </div>
                     )}
