@@ -4,6 +4,7 @@ import {useState, useEffect} from "react";
 import {LogOut} from  "lucide-react";
 import {handleLogOut} from "./Header.tsx";
 import NotificationButton from "./NotificationButton.tsx";
+import {useUser} from "../context/UserContext.tsx";
 
 // Define the type for the props
 interface Props {
@@ -29,7 +30,7 @@ function TopHeader({links, logo}: Props) {
             window.removeEventListener('scroll', handleScroll);
         };
     }, [prevScrollPos]);
-    const user = JSON.parse(window.localStorage.getItem("user") || "null");
+    const {user} = useUser()
     return (
         <motion.div
             className={` ${visible ? '' : '-translate-y-18'} bg-[#1b1d20]/50 text-white fixed z-999 duration-500 h-16 font-bold lg:text-xl left-0 top-0 text-md items-center justify-between w-screen border-violet-300 border-b-2 hidden lg:flex px-4 lg:px-36 xl:px-64 shadow-violet-400/20 shadow-md`}>
