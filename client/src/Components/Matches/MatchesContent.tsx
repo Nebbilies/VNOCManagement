@@ -1,14 +1,15 @@
 import {Match} from "./MatchesComponent.tsx";
 import {AnimatePresence, motion} from "motion/react";
-import horizontal_line from "../assets/horizontal_line.png";
-import RescheduleButton from "./RescheduleButton.tsx";
+import horizontal_line from "../../assets/horizontal_line.png";
+import RescheduleButton from "./Manage/RescheduleButton.tsx";
 import {EditMatchButton} from "./EditMatchButton.tsx";
 import {DeleteMatchButton} from "./DeleteMatchButton.tsx";
-import {Staff} from "./StaffComponent.tsx";
+import {Staff} from "../Staff/StaffComponent.tsx";
 import {StaffRole} from "./MatchesStaff.tsx";
 import {ClaimMatchButton} from "./ClaimMatchButton.tsx";
-import {useUser} from "../context/UserContext.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 import {useState} from "react";
+import {UnclaimMatchButton} from "./UnclaimMatchButton.tsx";
 
 interface Props {
     match: Match;
@@ -33,6 +34,10 @@ function MatchesContent({match, index}: Props) {
     if (user) {
         userRole = user.role;
         userId = user.id;
+    }
+    let claimed = false;
+    if (match.staff) {
+        claimed = match.staff.some(staffMember => staffMember.Id === userId);
     }
     const processStaffData = (staffArray: Staff[]) => {
         const groupedStaff: groupedStaff = {
@@ -120,9 +125,12 @@ function MatchesContent({match, index}: Props) {
                                             <DeleteMatchButton matchId={match.id}/>
                                         </>
                                     ) : null}
-                                    {userRole === "REFEREE" || userRole === "ADMIN" || userRole === "COMMENTATOR" || userRole === "STREAMER" ? (
+                                    {(userRole === "REFEREE" || userRole === "ADMIN" || userRole === "COMMENTATOR" || userRole === "STREAMER") && !claimed ? (
                                         <ClaimMatchButton matchId={match.id}/>
                                     ): null}
+                                    {claimed ? (
+                                        <UnclaimMatchButton matchId={match.id}/>
+                                    ) : null}
                                 </div>
                             </div>
                             <div

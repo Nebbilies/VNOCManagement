@@ -2,8 +2,8 @@ import {PlayerData} from "./PlayersComponent.tsx";
 import {AnimatePresence, motion} from "motion/react";
 import {useEffect, useState} from "react";
 import {Trash2, ChevronLeft, ChevronRight} from "lucide-react";
-import {useToast} from "../context/ToastContext.tsx";
-import {useUser} from "../context/UserContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 interface Props {
     playerData: PlayerData

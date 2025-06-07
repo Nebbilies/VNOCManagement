@@ -4,9 +4,9 @@ import {MappoolStyle} from "./MappoolContent.tsx";
 import {EllipsisVertical, Search} from 'lucide-react';
 import {AnimatePresence, motion} from "motion/react";
 import {fetchBeatmapData} from "./MappoolComponent.tsx";
-import {MappoolContext} from "../context/MappoolContext.tsx";
-import {useToast} from "../context/ToastContext.tsx";
-import {useUser} from "../context/UserContext.tsx";
+import {MappoolContext} from "../../context/MappoolContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 //good habit
 interface Props {

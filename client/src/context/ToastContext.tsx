@@ -1,6 +1,6 @@
 // contexts/ToastContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import Toast from "../Components/Toast.tsx";
+import Toast from "../Components/Utility/Toast.tsx";
 
 interface ToastContextType {
     showSuccess: (message: string) => void;

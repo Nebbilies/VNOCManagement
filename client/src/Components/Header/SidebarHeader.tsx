@@ -5,7 +5,7 @@ import {LogOut, Menu, X} from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
 import {handleLogOut} from "./Header.tsx";
 import NotificationButton from "./NotificationButton.tsx";
-import {useUser} from "../context/UserContext.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 interface Props {
     links: Array<{ name: string, path: string }>;

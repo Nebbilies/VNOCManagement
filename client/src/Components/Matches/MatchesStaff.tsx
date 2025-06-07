@@ -1,4 +1,4 @@
-import {Staff} from "./StaffComponent.tsx";
+import {Staff} from "../Staff/StaffComponent.tsx";
 
 interface StaffMemberProps {
     username: string;

@@ -1,12 +1,12 @@
 import React, {useEffect, useState, useContext} from "react";
-import checkValidDateTime from "../lib/checkValidDateTime.ts";
+import checkValidDateTime from "../../lib/checkValidDateTime.ts";
 import {AnimatePresence, motion} from "motion/react";
 import {Pencil} from 'lucide-react';
 import {Match} from "./MatchesComponent.tsx"
-import {playerSelectStyles} from "../lib/playerSelectStyles.tsx";
+import {playerSelectStyles} from "../../lib/playerSelectStyles.tsx";
 import Select from "react-select";
-import {MatchesContext} from "../context/MatchesContext.tsx";
-import {useToast} from "../context/ToastContext.tsx";
+import {MatchesContext} from "../../context/MatchesContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
 
 interface Props {
     currentMatch: Match;

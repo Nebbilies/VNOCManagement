@@ -1,12 +1,12 @@
 import {AnimatePresence, motion} from "motion/react"
 import React, {useEffect, useState} from "react";
-import checkValidDateTime from "../lib/checkValidDateTime.ts";
+import checkValidDateTime from "../../lib/checkValidDateTime.ts";
 import { Plus } from 'lucide-react';
-import {RoundInfo} from "./MappoolComponent.tsx";
+import {RoundInfo} from "../Mappool/MappoolComponent.tsx";
 import Select from "react-select";
 import {ReactSelectOptions} from "./MatchesComponent.tsx";
-import {playerSelectStyles} from "../lib/playerSelectStyles.tsx";
-import {useToast} from "../context/ToastContext.tsx";
+import {playerSelectStyles} from "../../lib/playerSelectStyles.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
 
 interface Props {
     setRefresh : (refresh: boolean) => void;

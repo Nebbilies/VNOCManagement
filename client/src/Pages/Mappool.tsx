@@ -1,5 +1,5 @@
 
-import MappoolComponent from "../Components/MappoolComponent.tsx";
+import MappoolComponent from "../Components/Mappool/MappoolComponent.tsx";
 
 function Mappool() {
     return (

@@ -1,8 +1,8 @@
 import {Ban, Check} from 'lucide-react';
 import {useEffect, useState} from "react";
-import {RescheduleRequest} from "./MatchesComponent.tsx";
-import {fetchRescheduleRequests} from "../lib/fetchFunctions.tsx";
-import {useToast} from "../context/ToastContext.tsx";
+import {RescheduleRequest} from "../MatchesComponent.tsx";
+import {fetchRescheduleRequests} from "../../../lib/fetchFunctions.tsx";
+import {useToast} from "../../../context/ToastContext.tsx";
 import {AnimatePresence, motion} from "motion/react";
 
 export function RescheduleRequestsModal() {

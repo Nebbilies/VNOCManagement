@@ -1,6 +1,6 @@
 import {createContext} from "react";
-import {RoundInfo} from "../Components/MappoolComponent.tsx";
-import {ReactSelectOptions, RescheduleRequest} from "../Components/MatchesComponent.tsx";
+import {RoundInfo} from "../Components/Mappool/MappoolComponent.tsx";
+import {ReactSelectOptions, RescheduleRequest} from "../Components/Matches/MatchesComponent.tsx";
 
 export type MatchesContextType =  {
     playerOptions: ReactSelectOptions[];

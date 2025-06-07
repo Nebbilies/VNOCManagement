@@ -1,9 +1,9 @@
 import {useContext, useEffect, useState} from "react";
-import checkValidDateTime from "../lib/checkValidDateTime.ts";
+import checkValidDateTime from "../../../lib/checkValidDateTime.ts";
 import {AnimatePresence, motion} from "motion/react";
 import {CalendarClock} from 'lucide-react';
-import {useToast} from "../context/ToastContext.tsx";
-import {MatchesContext} from "../context/MatchesContext.tsx";
+import {useToast} from "../../../context/ToastContext.tsx";
+import {MatchesContext} from "../../../context/MatchesContext.tsx";
 
 interface Props {
     matchId: string;

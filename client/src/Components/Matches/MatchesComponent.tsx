@@ -1,15 +1,15 @@
-import {Player, PlayerData} from "./PlayersComponent.tsx";
-import {RoundInfo} from "./MappoolComponent.tsx";
+import {Player, PlayerData} from "../Players/PlayersComponent.tsx";
+import {RoundInfo} from "../Mappool/MappoolComponent.tsx";
 import MatchesContent from "./MatchesContent.tsx";
-import  {MatchesContext} from "../context/MatchesContext.tsx";
+import  {MatchesContext} from "../../context/MatchesContext.tsx";
 import AddMatchButton from "./AddMatchButton.tsx";
-import {ManageMatchButton} from "./ManageMatchButton.tsx";
-import {Staff} from "./StaffComponent.tsx";
+import {ManageMatchButton} from "./Manage/ManageMatchButton.tsx";
+import {Staff} from "../Staff/StaffComponent.tsx";
 import {useState, useEffect} from "react";
-import {Loading} from "./Loading.tsx";
-import {fetchMatches, fetchPlayers, fetchRescheduleRequests, fetchRounds} from "../lib/fetchFunctions.tsx"
-import {useToast} from "../context/ToastContext.tsx";
-import {useUser} from "../context/UserContext.tsx";
+import {Loading} from "../Utility/Loading.tsx";
+import {fetchMatches, fetchPlayers, fetchRescheduleRequests, fetchRounds} from "../../lib/fetchFunctions.tsx"
+import {useToast} from "../../context/ToastContext.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 export interface Match {
     id: string;

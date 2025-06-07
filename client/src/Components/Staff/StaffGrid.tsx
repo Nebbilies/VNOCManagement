@@ -2,8 +2,8 @@ import {Staff} from "./StaffComponent.tsx";
 import {useState} from "react";
 import {AnimatePresence, motion} from "motion/react";
 import {Trash2} from "lucide-react";
-import {useToast} from "../context/ToastContext.tsx";
-import {useUser} from "../context/UserContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 const hidden = {opacity: 0, x: 0, y: -10}
 const enter = {opacity: 1, x: 0, y: 0}

@@ -1,6 +1,6 @@
 import PlayersGrid from "./PlayersGrid.tsx";
 import {useEffect, useState} from "react";
-import {fetchPlayers} from "../lib/fetchFunctions.tsx";
+import {fetchPlayers} from "../../lib/fetchFunctions.tsx";
 
 export interface Player {
     Id: number,

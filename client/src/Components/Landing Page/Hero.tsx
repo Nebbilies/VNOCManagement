@@ -1,8 +1,8 @@
-import bg from '../assets/vnoctb.mp4'
-import vnoc2024 from '../assets/vnoc_2024.png'
-import vcl from '../assets/vcl.png'
+import bg from '../../assets/vnoctb.mp4'
+import vnoc2024 from '../../assets/vnoc_2024.png'
+import vcl from '../../assets/vcl.png'
 import { motion } from 'framer-motion'
-import { variants } from "../lib/variants.tsx";
+import { variants } from "../../lib/variants.tsx";
 import {RegisterButton} from "./RegisterButton.tsx";
 
 function Hero() {

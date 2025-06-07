@@ -1,10 +1,10 @@
 import {useEffect, useState} from "react";
 import {AnimatePresence, motion} from "motion/react";
-import {RoundInfo} from "./MappoolComponent.tsx";
-import {fetchRounds} from "../lib/fetchFunctions.tsx";
+import {RoundInfo} from "../../Mappool/MappoolComponent.tsx";
+import {fetchRounds} from "../../../lib/fetchFunctions.tsx";
 import {AddRoundModal} from "./AddRoundModal.tsx";
 import {Pencil, Ban} from "lucide-react";
-import {useToast} from "../context/ToastContext.tsx";
+import {useToast} from "../../../context/ToastContext.tsx";
 
 interface EditRoundModalProps {
     setRefresh: (refresh: boolean) => void;
@@ -72,7 +72,7 @@ const EditRoundModal = ({setRefresh, round}: EditRoundModalProps) => {
                         transition={{type: "spring", damping: 25, stiffness: 300}}
                         className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#23263a] rounded-lg shadow-2xl p-6 z-50 w-10/11 sm:w-96"
                     >
-                        <h2 className="text-xl font-semibold mb-4 text-white">Add Round</h2>
+                        <h2 className="text-xl font-semibold mb-4 text-white">Edit Round</h2>
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">
                                 <label htmlFor="roundName" className="block text-sm font-medium text-white mb-1">

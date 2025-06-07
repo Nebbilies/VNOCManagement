@@ -1,5 +1,5 @@
 
-import MatchesComponent from "../Components/MatchesComponent.tsx";
+import MatchesComponent from "../Components/Matches/MatchesComponent.tsx";
 
 function Matches() {
     return (

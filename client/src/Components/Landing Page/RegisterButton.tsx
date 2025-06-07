@@ -1,7 +1,7 @@
 import {useState} from "react";
-import {useToast} from "../context/ToastContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
 import {AnimatePresence, motion} from "motion/react";
-import {useUser} from "../context/UserContext.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 export function RegisterButton() {
     const apiBase = import.meta.env.VITE_API_BASE_URL

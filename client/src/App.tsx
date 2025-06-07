@@ -5,7 +5,7 @@ import Info from "./Pages/Info.tsx";
 import Mappool from "./Pages/Mappool.tsx";
 import Players from "./Pages/Players.tsx";
 import Matches from "./Pages/Matches.tsx";
-import Header from "./Components/Header.tsx";
+import Header from "./Components/Header/Header.tsx";
 import {ToastProvider} from "./context/ToastContext.tsx";
 import {useEffect} from "react";
 

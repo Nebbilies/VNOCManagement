@@ -1,8 +1,8 @@
-import StaffGrid from "./StaffGrid";
+import StaffGrid from "./StaffGrid.tsx";
 import {AddStaffButton} from "./AddStaffButton.tsx";
 import {useState, useEffect} from "react";
-import {Loading} from "./Loading.tsx";
-import {useUser} from "../context/UserContext.tsx";
+import {Loading} from "../Utility/Loading.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 export const roles = [
     "Admin",

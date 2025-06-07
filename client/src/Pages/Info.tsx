@@ -1,4 +1,4 @@
-import InfoComponent from "../Components/InfoComponent.tsx";
+import InfoComponent from "../Components/Info/InfoComponent.tsx";
 
 function Info() {
     return (

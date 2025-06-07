@@ -1,4 +1,4 @@
-import PlayersComponent from "../Components/PlayersComponent.tsx";
+import PlayersComponent from "../Components/Players/PlayersComponent.tsx";
 
 function Players() {
     return (

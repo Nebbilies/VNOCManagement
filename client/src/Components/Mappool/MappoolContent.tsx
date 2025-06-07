@@ -1,8 +1,8 @@
 import {useContext, useEffect, useState} from "react";
 import MappoolContentCategory from "./MappoolContentCategory.tsx";
-import {mappoolStyle} from "../lib/mappoolStyle.tsx";
-import {MappoolContext} from "../context/MappoolContext.tsx";
-import {Loading} from "./Loading.tsx";
+import {mappoolStyle} from "../../lib/mappoolStyle.tsx";
+import {MappoolContext} from "../../context/MappoolContext.tsx";
+import {Loading} from "../Utility/Loading.tsx";
 
 export interface MappoolStyle {
     name: string,

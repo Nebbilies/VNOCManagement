@@ -3,7 +3,7 @@ import MappoolContentCard from "./MappoolContentCard.tsx";
 import {PoolData} from "./MappoolContent.tsx";
 import {MappoolStyle} from "./MappoolContent.tsx";
 import { useContext} from "react";
-import {MappoolContext} from "../context/MappoolContext.tsx";
+import {MappoolContext} from "../../context/MappoolContext.tsx";
 
 interface Props {
     style: MappoolStyle,

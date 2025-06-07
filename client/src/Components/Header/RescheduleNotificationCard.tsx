@@ -1,7 +1,7 @@
-import {RescheduleRequest} from "./MatchesComponent.tsx";
+import {RescheduleRequest} from "../Matches/MatchesComponent.tsx";
 import {useState} from "react";
 import {AnimatePresence, motion} from "motion/react";
-import {useToast} from "../context/ToastContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
 
 interface Props {
     rescheduleNotification: RescheduleRequest;

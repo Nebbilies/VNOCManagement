@@ -1,11 +1,11 @@
 import MappoolContent from "./MappoolContent.tsx";
 import React, {useEffect, useState} from "react";
 import {motion, AnimatePresence} from "motion/react";
-import {MappoolContext} from "../context/MappoolContext.tsx";
+import {MappoolContext} from "../../context/MappoolContext.tsx";
 import {Plus, Search} from "lucide-react";
-import {useToast} from "../context/ToastContext.tsx";
-import { fetchRounds, fetchMappool } from "../lib/fetchFunctions.tsx";
-import {useUser} from "../context/UserContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
+import { fetchRounds, fetchMappool } from "../../lib/fetchFunctions.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 interface PoolData {
     NM: MapData[],

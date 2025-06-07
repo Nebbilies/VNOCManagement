@@ -1,11 +1,11 @@
 import {Bell, Circle} from 'lucide-react';
 import {useEffect, useState, useRef} from "react";
 import {AnimatePresence, motion} from "motion/react";
-import {fetchRescheduleRequests} from "../lib/fetchFunctions.tsx";
-import {useUser} from "../context/UserContext.tsx";
-import {RescheduleRequest} from "./MatchesComponent.tsx";
+import {fetchRescheduleRequests} from "../../lib/fetchFunctions.tsx";
+import {useUser} from "../../context/UserContext.tsx";
+import {RescheduleRequest} from "../Matches/MatchesComponent.tsx";
 import RescheduleNotificationCard from "./RescheduleNotificationCard.tsx";
-import {useToast} from "../context/ToastContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
 
 interface Props {
     mode: 'pc' | 'mobile';

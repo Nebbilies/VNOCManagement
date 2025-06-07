@@ -1,5 +1,5 @@
 import {createContext} from "react";
-import {PoolData} from "../Components/MappoolContent.tsx";
+import {PoolData} from "../Components/Mappool/MappoolContent.tsx";
 
 export type MappoolContextType = {
     mappool: PoolData;
