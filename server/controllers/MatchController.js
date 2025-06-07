@@ -174,7 +174,15 @@ module.exports = {
         }
 
         try {
-            await pool.query(`DELETE FROM matches WHERE Id = ?`, [matchId]);
+            await pool.query(`DELETE FROM reschedule_request WHERE MatchId = ?`, [matchId]);
+            await pool.query(`DELETE FROM match_staff WHERE matchId = ?`, [matchId]);
+
+            const [existing] = await pool.query(`DELETE FROM matches WHERE Id = ?`, [matchId]);
+
+            if (existing.affectedRows === 0) {
+                return res.status(404).json({ error: "Match not found" });
+            }
+
             res.json({ message: "Match deleted successfully" });
         } catch (err) {
             console.error("[deleteMatch] Error:", err);
