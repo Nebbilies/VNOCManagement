@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
 }));
 
@@ -40,5 +40,5 @@ const ReschRouter = require("./routes/RescheduleRouter.js");
 app.use("/api/resch", ReschRouter);
 
 app.listen(3001, () => {
-    console.log("Server running on http://localhost:3001");
+    console.log("Server running!");
 });
