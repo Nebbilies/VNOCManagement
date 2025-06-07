@@ -226,5 +226,39 @@ module.exports = {
             console.error("[claimMatch] Error:", err);
             res.status(500).json({ error: "Failed to claim match" });
         }
+    },
+
+    async unclaimMatch(req, res) {
+        try {
+            const user = req.user;
+            const validRoles = ["REFEREE", "COMMENTATOR", "STREAMER", "ADMIN"];
+            if (!validRoles.includes(user.role)) {
+                return res.status(403).json({ error: "Forbidden" });
+            }
+
+            const { matchId } = req.body;
+
+            const [check] = await pool.query(
+                `SELECT * FROM matches WHERE Id = ?`,
+                [matchId]
+            );
+
+            if (check.length === 0){
+                return res.status(404).json({error: "Match not found"})
+            }
+
+            const [existing] = await pool.query(
+                `DELETE FROM match_staff WHERE MatchId = ? AND StaffId = ?`,
+                [matchId, user.id]
+            );
+            if (existing.affectedRows === 0) {
+                return res.status(404).json({ error: "You have not claimed this match" });
+            }
+
+            return res.status(200).json({ message: "Match unclaimed successfully" });
+        } catch (err) {
+            console.error("[claimMatch] Error:", err);
+            res.status(500).json({ error: "Failed to unclaim match" });
+        }
     }
 };

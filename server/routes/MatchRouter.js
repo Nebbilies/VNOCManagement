@@ -11,5 +11,6 @@ router.post("/add", checkRole, MatchController.addMatch);
 router.put("/edit/:id", checkRole, MatchController.editMatch);
 router.delete("/:id", checkRole, MatchController.deleteMatch);
 router.post("/claim", checkRole, MatchController.claimMatch);
+router.post("/unclaim", checkRole, MatchController.unclaimMatch);
 
 module.exports = router;
