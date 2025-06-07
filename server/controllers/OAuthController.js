@@ -46,8 +46,8 @@ module.exports = {
 
             res.cookie("osu_token", access_token, {
                 httpOnly: true,
-                secure: false,
-                sameSite: 'lax',
+                secure: process.env.COOKIE_SECURE,
+                sameSite: `${process.env.COOKIE_SAME_SITE}`,
                 maxAge: 1000 * 60 * 60 * 24,
             });
 
