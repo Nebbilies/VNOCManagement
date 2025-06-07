@@ -1,6 +1,6 @@
 const express = require('express');
 const StaffController = require('../controllers/StaffController');
-const checkRole = require('../middlewares/CheckRole');
+const checkRole = require('../middlewares/checkRole');
 
 const router = express.Router();
 

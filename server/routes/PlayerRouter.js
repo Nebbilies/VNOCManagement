@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const PlayerController = require("../controllers/PlayerController");
-const checkRole = require("../middlewares/CheckRole");
+const checkRole = require("../middlewares/checkRole");
 
 
 router.post("/add", PlayerController.addPlayer);
