@@ -62,7 +62,7 @@ module.exports = {
                 }
             }
 
-            res.redirect(`http://localhost:5173${redirectTo}`);
+            res.redirect(`${process.env.FRONTEND_URL}${redirectTo}`);
         } catch (error) {
             console.error("OAuth Error:", error.response?.data || error.message);
             res.status(500).send("OAuth login failed");
@@ -137,7 +137,7 @@ module.exports = {
             sameSite: 'lax',
         });
 
-        res.redirect("http://localhost:5173/");
+        res.redirect(process.env.FRONTEND_URL);
     }
 
 };
