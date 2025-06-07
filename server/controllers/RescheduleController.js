@@ -164,17 +164,33 @@ module.exports = {
         }
 
         try {
-            const [rows] = await pool.query("SELECT playerRespondId FROM reschedule_request WHERE id = ?", [Id]);
+            const [reschrows] = await pool.query(`SELECT * FROM reschedule_request WHERE Id = ?`, [Id]);
 
-            if (rows.length === 0) {
+            if (reschrows.length === 0) {
                 return res.status(404).json({ error: "Reschedule request not found" });
             }
 
-            if (rows[0].playerRespondId !== userId) {
+            if (reschrows[0].PlayerRespondId !== userId) {
                 return res.status(403).json({ error: "You are not authorized to respond to this request" });
             }
 
             await pool.query("UPDATE reschedule_request SET status = ? WHERE id = ?", [Status, Id]);
+
+            if (Status === "ACCEPTED") {
+                await pool.query(`
+                    UPDATE matches
+                    SET StartingTime = (
+                        SELECT NewTime
+                        FROM reschedule_request
+                        WHERE Id = ?
+                    )
+                    WHERE Id = (
+                        SELECT matchId
+                        FROM reschedule_request
+                        WHERE Id = ?
+                    )`, [Id, Id]);
+            }
+
             res.json({ message: `Reschedule status updated to ${Status}` });
 
         } catch (err) {
