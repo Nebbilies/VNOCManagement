@@ -4,7 +4,8 @@ const querystring = require("querystring");
 
 const OSU_CLIENT_ID = process.env.OSU_CLIENT_ID;
 const OSU_CLIENT_SECRET = process.env.OSU_CLIENT_SECRET;
-const REDIRECT_URI = "http://localhost:3001/api/auth/callback";
+const apiBase = process.env.VITE_API_BASE_URL
+const REDIRECT_URI = `${apiBase}/auth/callback`;
 
 module.exports = {
     login(req, res) {

@@ -4,6 +4,7 @@ import {AnimatePresence, motion} from "motion/react";
 import {useUser} from "../context/UserContext.tsx";
 
 export function RegisterButton() {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const { user } = useUser()
     const {showSuccess, showError} = useToast();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,7 +13,7 @@ export function RegisterButton() {
     const register = async() =>{
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3001/api/players/add', {
+            const response = await fetch(`${apiBase}/players/add`, {
                 credentials: 'include',
                 method: 'POST',
                 headers: {

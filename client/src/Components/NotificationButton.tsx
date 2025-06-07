@@ -5,6 +5,7 @@ import {fetchRescheduleRequests} from "../lib/fetchFunctions.tsx";
 import {useUser} from "../context/UserContext.tsx";
 import {RescheduleRequest} from "./MatchesComponent.tsx";
 import RescheduleNotificationCard from "./RescheduleNotificationCard.tsx";
+import {useToast} from "../context/ToastContext.tsx";
 
 interface Props {
     mode: 'pc' | 'mobile';
@@ -21,6 +22,7 @@ function NotificationButton({mode}: Props) {
     const menuRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLDivElement>(null);
     const [refresh, setRefresh] = useState<boolean>(false);
+    const {showError} = useToast();
     // Handle clicks outside the notification menu
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -56,6 +58,7 @@ function NotificationButton({mode}: Props) {
                     return;
                 }
                 console.error("Error fetching reschedule requests:", error);
+                showError("An error occurred while fetching notifications. Please try again later or refresh the page.");
             });
         return () => {
             abortController.abort();

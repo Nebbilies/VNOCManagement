@@ -17,6 +17,7 @@ const exit = {opacity: 0, x: 0, y: -10}
 let ROWS_PER_PAGE = 5;
 
 function PlayersGrid({playerData, toggleRefresh}: Props) {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const {user} = useUser();
     let userRole = "";
     if (user) {
@@ -75,7 +76,7 @@ function PlayersGrid({playerData, toggleRefresh}: Props) {
 
     async function onDeletePlayer() {
         setLoading(true);
-        const response = await fetch(`http://localhost:3001/api/players/remove/${deletePlayer}`, {
+        const response = await fetch(`${apiBase}/players/remove/${deletePlayer}`, {
             credentials: 'include',
             method: 'DELETE',
         });

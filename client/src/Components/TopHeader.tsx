@@ -15,7 +15,7 @@ interface Props {
 function TopHeader({links, logo}: Props) {
     const [prevScrollPos, setPrevScrollPos] = useState(0);
     const [visible, setVisible] = useState(true);
-
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollPos = window.scrollY;
@@ -68,7 +68,7 @@ function TopHeader({links, logo}: Props) {
                         <div>
                         <div className={'w-full h-full'}>
                     {!user ? (
-                        <Link to={"http://localhost:3001/api/auth/login"}>Login</Link>
+                        <Link to={`${apiBase}/auth/login`}>Login</Link>
                     ) : (
                         <div className="flex items-center justify-center gap-2">
                             {user.avatar_url ? (

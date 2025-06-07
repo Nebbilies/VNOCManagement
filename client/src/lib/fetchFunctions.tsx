@@ -1,14 +1,9 @@
-import {useToast} from "../context/ToastContext.tsx";
-
-const HandleError = () => {
-    const {showError} = useToast()
-    showError('Error fetching data. Please check your internet connection and try again.');
-}
+const apiBase = import.meta.env.VITE_API_BASE_URL;
 
 export const fetchRounds = async (signal: AbortSignal) => {
 
     try {
-        const response = await fetch('http://localhost:3001/api/round', { signal });
+        const response = await fetch(`${apiBase}/round`, { signal });
         if (!response.ok) {
             throw new Error('Failed to fetch round');
         }
@@ -18,7 +13,6 @@ export const fetchRounds = async (signal: AbortSignal) => {
     } catch (error: Error) {
         if (error.name !== 'AbortError') {
             console.error('Error fetching round:', error);
-            HandleError();
         }
         throw error;
     }
@@ -26,7 +20,7 @@ export const fetchRounds = async (signal: AbortSignal) => {
 
 export const fetchMatches = async (signal: AbortSignal) => {
     try {
-        const response = await fetch('http://localhost:3001/api/matches', { signal });
+        const response = await fetch(`${apiBase}/matches`, { signal });
         if (!response.ok) {
             throw new Error('Failed to fetch matches');
         }
@@ -36,7 +30,6 @@ export const fetchMatches = async (signal: AbortSignal) => {
     } catch (error: Error) {
         if (error.name !== 'AbortError') {
             console.error('Error fetching round:', error);
-            HandleError();
         }
         throw error;
     }
@@ -44,7 +37,7 @@ export const fetchMatches = async (signal: AbortSignal) => {
 
 export const fetchMappool = async (signal: AbortSignal) => {
     try {
-        const response = await fetch('http://localhost:3001/api/maps/all', { signal });
+        const response = await fetch(`${apiBase}/maps/all`, { signal });
         if (!response.ok) {
             throw new Error('Failed to fetch mappool');
         }
@@ -54,7 +47,6 @@ export const fetchMappool = async (signal: AbortSignal) => {
     } catch (error: Error) {
         if (error.name !== 'AbortError') {
             console.error('Error fetching mappool:', error);
-            HandleError();
         }
         throw error;
     }
@@ -62,7 +54,7 @@ export const fetchMappool = async (signal: AbortSignal) => {
 
 export const fetchPlayers = async (signal: AbortSignal) => {
     try {
-        const response = await fetch('http://localhost:3001/api/players/all', { signal });
+        const response = await fetch(`${apiBase}/players/all`, { signal });
         if (!response.ok) {
             throw new Error('Failed to fetch players');
         }
@@ -72,7 +64,6 @@ export const fetchPlayers = async (signal: AbortSignal) => {
     } catch (error: Error) {
         if (error.name !== 'AbortError') {
             console.error('Error fetching players:', error);
-            HandleError();
         }
         throw error;
     }
@@ -101,7 +92,7 @@ export const fetchRescheduleRequests = async ({signal, playerRequestId, playerRe
         if (status) {
             query += `${query ? '&' : '?'}status=${status}`;
         }
-        const response = await fetch(`http://localhost:3001/api/resch${query}`, {
+        const response = await fetch(`${apiBase}/resch${query}`, {
             signal,
         });
         if (!response.ok) {
@@ -113,7 +104,6 @@ export const fetchRescheduleRequests = async ({signal, playerRequestId, playerRe
     } catch (error: Error) {
         if (error.name !== 'AbortError') {
             console.error('Error fetching reschedule requests:', error);
-            HandleError();
         }
         throw error;
     }

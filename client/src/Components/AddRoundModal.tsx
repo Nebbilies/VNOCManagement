@@ -8,6 +8,7 @@ interface Props {
 }
 
 export function AddRoundModal({closeAddRoundModal, setRefresh}: Props) {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const [roundName, setRoundName] = useState("");
     const [roundAcronym, setRoundAcronym] = useState("");
     const {showSuccess, showError} = useToast();
@@ -15,7 +16,7 @@ export function AddRoundModal({closeAddRoundModal, setRefresh}: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         setLoading(true);
         e.preventDefault();
-        const response = await fetch('http://localhost:3001/api/round/add',{
+        const response = await fetch(`${apiBase}/round/add`,{
             method: 'POST',
             credentials: 'include',
             headers: {

@@ -22,8 +22,9 @@ export function ClaimMatchButton({ matchId }: Props) {
     }
 
     const handleClaim = async () => {
+        const apiBase = import.meta.env.VITE_API_BASE_URL
         setLoading(true);
-        const response = await fetch(`http://localhost:3001/api/matches/claim`, {
+        const response = await fetch(`${apiBase}/matches/claim`, {
             method: 'POST',
             credentials: "include",
             headers: {

@@ -16,8 +16,8 @@ export interface Match {
     time: string;
     player1: Player;
     player2: Player;
-    player1Score: number | null;
-    player2Score: number | null;
+    player1Score: number | 0;
+    player2Score: number | 0;
     matchLink: string | null;
     staff: Staff[];
     status: string;

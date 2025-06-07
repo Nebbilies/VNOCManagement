@@ -1,5 +1,5 @@
 import {Match} from "./MatchesComponent.tsx";
-import {motion} from "motion/react";
+import {AnimatePresence, motion} from "motion/react";
 import horizontal_line from "../assets/horizontal_line.png";
 import RescheduleButton from "./RescheduleButton.tsx";
 import {EditMatchButton} from "./EditMatchButton.tsx";
@@ -8,6 +8,7 @@ import {Staff} from "./StaffComponent.tsx";
 import {StaffRole} from "./MatchesStaff.tsx";
 import {ClaimMatchButton} from "./ClaimMatchButton.tsx";
 import {useUser} from "../context/UserContext.tsx";
+import {useState} from "react";
 
 interface Props {
     match: Match;
@@ -25,6 +26,7 @@ const enter = {opacity: 1, x: 0, y: 0}
 const exit = {opacity: 0, x: 0, y: -30}
 
 function MatchesContent({match, index}: Props) {
+    const [hovering, setHovering] = useState(false);
     const {user} = useUser();
     let userRole: string = "";
     let userId: number = 0;
@@ -54,19 +56,42 @@ function MatchesContent({match, index}: Props) {
     const matchTime = match.time.split("T")[1].split(":").slice(0, 2).join(":");
     const staffByRole = processStaffData(match.staff);
     return (
-                    <motion.div key={match.id} className={"match-card flex flex-col items-center mb-12 h-auto"}
+                    <motion.div key={match.id} className={"match-card flex flex-col items-center mb-12 h-auto "}
                                 initial={hidden}
                                 animate={enter}
                                 exit={exit}
                                 transition={{ type: "spring", duration: 1, ease: "easeInOut", delay: index * 0.15 }}>
-                        <div className={`match-card-id w-30 rounded-t-xl bg-[#b65959] text-black text-center align-middle px-1 py-0.7`}>
+                        <div className={`match-card-id w-30 rounded-t-xl bg-[#b65959] text-black text-center align-middle px-1 py-0.7 flex items-center justify-center relative`}>
+                            {(match.matchLink !== "" && match.matchLink !== null ? (
+                                <a href={match.matchLink || undefined} target="_blank" rel="noopener noreferrer"
+                                   className={'absolute top-0 left-0 w-full h-full z-10'}></a>
+                            ) : null)}
                             <span className={"text-md font-bold text-[#3d1515]"}>Match {match.id}</span>
                         </div>
-                        <div className={`match-card-info flex mt-0 bg-[#353d60] justify-between rounded-t-xl w-full items-center h-30`}>
-                            <div className={`match-card-player-1 w-3/10 flex rounded-xl bg-[#131724] ml-4 my-4 items-center`}>
+                        <div className={`match-card-info flex mt-0 bg-[#353d60] justify-between rounded-t-xl w-full items-center h-30 relative ${match.status === 'FINISHED' ? 'border-t-3 border-x-3 border-green-300/80' : ''}`}
+                            onMouseEnter={() => setHovering(true)}
+                            onMouseLeave={() => setHovering(false)}
+                        >
+                            <div
+                                className={`match-card-player-1 w-3/10 flex rounded-xl bg-[#131724] ml-4 my-4 items-center relative ${match.player1.Id === userId ? 'border-2 border-yellow-300' : ''}`}>
+                                {hovering && match.status === 'FINISHED' ? (
+                                    <AnimatePresence>
+                                        <motion.div
+                                            className="absolute top-0 left-0 w-full h-full bg-black/90 rounded-xl text-3xl flex items-center justify-center"
+                                            initial={{opacity: 0}}
+                                            animate={{opacity: 1}}
+                                            exit={{opacity: 0}}
+                                            transition={{duration: 0.2}}
+                                        >
+                                            <span className={`${match.player1Score > match.player2Score ? 'text-red-600' : "text-blue-600"} font-semibold`}>
+                                                {match.player1Score}
+                                            </span>
+                                        </motion.div>
+                                    </AnimatePresence>
+                                ) : null}
                                     <img alt="player avatar" src={`https://a.ppy.sh/${match.player1.Id}`}
                                          className={"h-20 w-auto aspect-square rounded-xl hidden md:flex"}/>
-                                <div className={'player-1-info flex flex-col w-full py-1 px-2 text-start truncate inline overflow-hidden'}>
+                                <div className={`player-1-info flex flex-col w-full py-1 px-2 text-start truncate inline overflow-hidden`}>
                                     <div className={'font-extrabold text-2xl lg:text-3xl inline'}>
                                         {match.player1.Username}
                                     </div>
@@ -101,9 +126,24 @@ function MatchesContent({match, index}: Props) {
                                 </div>
                             </div>
                             <div
-                                className={`match-card-player-2 w-3/10 flex rounded-xl bg-[#131724] mr-4 my-4 items-center`}>
+                                className={`match-card-player-2 w-3/10 flex rounded-xl bg-[#131724] mr-4 my-4 items-center relative ${match.player2.Id === userId ? 'border-2 border-yellow-300' : ''}`}>
+                                {hovering && match.status === 'FINISHED' ? (
+                                    <AnimatePresence>
+                                        <motion.div
+                                            className="absolute top-0 left-0 w-full h-full bg-black/90 rounded-xl text-3xl flex items-center justify-center"
+                                            initial={{opacity: 0}}
+                                            animate={{opacity: 1}}
+                                            exit={{opacity: 0}}
+                                            transition={{duration: 0.2}}
+                                        >
+                                            <span className={`${match.player2Score > match.player1Score ? 'text-red-600' : "text-blue-600"} font-semibold`}>
+                                                {match.player2Score}
+                                            </span>
+                                        </motion.div>
+                                    </AnimatePresence>
+                                ) : null}
                                 <div
-                                    className={'player-2-info flex flex-col w-full text-end py-1 px-2 overflow-hidden'}>
+                                    className={`player-2-info flex flex-col w-full text-end py-1 px-2 overflow-hidden `}>
                                     <div
                                         className={"text-2xl lg:text-3xl font-bold truncate inline "}>
                                         {match.player2.Username}
@@ -113,11 +153,11 @@ function MatchesContent({match, index}: Props) {
                                     </h3>
                                 </div>
                                 <img alt="player avatar" src={`https://a.ppy.sh/${match.player2.Id}`}
-                                     className={"h-20 w-auto aspect-square rounded-xl hidden md:flex"}/>
+                                     className={"h-20 w-auto aspect-square rounded-[10px] hidden md:flex"}/>
                             </div>
                         </div>
                         {/* Staff Section */}
-                        <div className="staff-section w-full bg-[#2a2f45] rounded-b-xl px-6 py-4">
+                        <div className={`staff-section w-full bg-[#2a2f45] rounded-b-xl px-6 py-4 ${match.status === 'FINISHED' ? 'border-b-3 border-x-3 border-green-300/80' : ''}`}>
                             <div className="flex justify-center items-start gap-8 lg:gap-12">
                                 {/* Commentators */}
                                 {staffByRole.COMMENTATOR.length > 0 && (

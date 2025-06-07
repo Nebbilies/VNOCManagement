@@ -16,6 +16,7 @@ interface Props {
 }
 
 export default function MappoolContentCard({map, style, mod}: Props) {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const {user} = useUser()
     let userRole = 'USER';
     if (user) {
@@ -50,7 +51,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
     const menuRef = useRef<HTMLDivElement>(null);
     async function deleteBeatmap({round, mod, index}: { round: string, mod: string, index: number }) {
         setLoading(true);
-        const response = await fetch(`http://localhost:3001/api/maps/delete`, {
+        const response = await fetch(`${apiBase}/maps/delete`, {
             credentials: 'include',
             method: 'POST',
             headers: {
@@ -84,7 +85,7 @@ export default function MappoolContentCard({map, style, mod}: Props) {
             'newId:', beatmapSearchId
             )
 
-        const response = await fetch(`http://localhost:3001/api/maps/edit`, {
+        const response = await fetch(`${apiBase}/maps/edit`, {
             credentials: 'include',
             method: 'POST',
             headers: {

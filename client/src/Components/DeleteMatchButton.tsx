@@ -14,9 +14,10 @@ export function DeleteMatchButton({ matchId }: Props) {
     const [hoveringDeleteMatch, setHoveringDeleteMatch] = useState(false);
     const {showSuccess, showError} = useToast();
     const { setRefresh } = useContext(MatchesContext)
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const handleDelete = async () => {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/matches/${matchId}`, {
+            const response = await fetch(`${apiBase}/matches/${matchId}`, {
                 method: 'DELETE',
                 credentials: "include"
             });

@@ -16,10 +16,11 @@ interface Props {
 }
 
 export default function AddMatchButton({setRefresh, playerOptions, roundsList, matchIds}: Props) {
+        const apiBase = import.meta.env.VITE_API_BASE_URL
         let matchIdCounter = 1;
-        while (matchIds.includes(matchIdCounter.toString())) {
-            matchIdCounter++;
-        }
+    while (matchIds.includes(matchIdCounter.toString())) {
+        matchIdCounter++;
+    }
         const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
         const [matchId, setMatchId] = useState<string>(matchIdCounter.toString());
         const [player1Id, setPlayer1Id] = useState<number>(playerOptions.length  > 0 ? playerOptions[0].value : 0);
@@ -84,7 +85,7 @@ export default function AddMatchButton({setRefresh, playerOptions, roundsList, m
                 time: matchTime,
                 round: roundName
             };
-            const response = await fetch("http://localhost:3001/api/matches/add",
+            const response = await fetch(`${apiBase}/matches/add`,
                 {
                     credentials: "include",
                     method: "POST",

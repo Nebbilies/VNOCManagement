@@ -27,11 +27,12 @@ function StaffComponent() {
     if (user) {
         userRole = user.role;
     }
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const [staff, setStaff] = useState<Staff[]>([]);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
     useEffect(() => {
-        fetch("http://localhost:3001/api/staff/all", {
+        fetch(`${apiBase}/staff/all`, {
         })
             .then((res) => {
                 if (!res.ok) throw new Error("Failed to fetch staff");

@@ -104,6 +104,7 @@ interface AddBeatmapButtonProps {
 }
 
 const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [HoveringAddBeatmap, setHoveringAddBeatmap] = useState(false);
     const [beatmapId, setBeatmapId] = useState('');
@@ -138,7 +139,7 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3001/api/maps/add', {
+            const response = await fetch(`${apiBase}/maps/add`, {
                 method: 'POST',
                 credentials: "include",
                 headers: {

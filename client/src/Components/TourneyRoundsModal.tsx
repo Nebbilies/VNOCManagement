@@ -12,6 +12,7 @@ interface EditRoundModalProps {
 }
 
 const EditRoundModal = ({setRefresh, round}: EditRoundModalProps) => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const [roundName, setRoundName] = useState(round.Round);
     const [roundAcronym, setRoundAcronym] = useState(round.Acronym);
     const {showSuccess, showError} = useToast();
@@ -20,7 +21,7 @@ const EditRoundModal = ({setRefresh, round}: EditRoundModalProps) => {
     const handleSubmit = async (e: React.FormEvent) => {
         setLoading(true);
         e.preventDefault();
-        const response = await fetch('http://localhost:3001/api/round/edit', {
+        const response = await fetch(`${apiBase}/round/edit`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -132,6 +133,7 @@ const EditRoundModal = ({setRefresh, round}: EditRoundModalProps) => {
 }
 
 export function TourneyRoundsModal() {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const [loading, setLoading] = useState<boolean>(false);
     const {showSuccess, showError} = useToast();
     const [isAddRoundModalOpen, setIsAddRoundModalOpen] = useState<boolean>(false);
@@ -144,7 +146,7 @@ export function TourneyRoundsModal() {
     const handleDelete = async (roundAcronym: string) => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3001/api/round/delete', {
+            const response = await fetch(`${apiBase}/round/delete`, {
                 method: 'DELETE',
                 credentials: 'include',
                 headers: {

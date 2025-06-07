@@ -10,6 +10,7 @@ export function RescheduleRequestsModal() {
     const [hoveringRequest, setHoveringRequest] = useState<number>(-1);
     const [rescheduleRequests, setRescheduleRequests] = useState<RescheduleRequest[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -26,7 +27,7 @@ export function RescheduleRequestsModal() {
     }, []);
     const respondRequest = async (requestId: number, action: string): Promise<void> => {
         setLoading(true)
-        const response = await fetch(`http://localhost:3001/api/resch/${action === 'APPROVE' ? 'approve' : 'reject'}`, {
+        const response = await fetch(`${apiBase}/resch/${action === 'APPROVE' ? 'approve' : 'reject'}`, {
             method: 'POST',
             credentials: "include",
             headers: {

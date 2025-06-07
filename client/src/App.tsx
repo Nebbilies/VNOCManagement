@@ -7,9 +7,12 @@ import Players from "./Pages/Players.tsx";
 import Matches from "./Pages/Matches.tsx";
 import Header from "./Components/Header.tsx";
 import {ToastProvider} from "./context/ToastContext.tsx";
+import {useEffect} from "react";
 
 function App() {
-    document.title = "Vietnam osu! Championship";
+    useEffect(() => {
+        document.title = 'Vietnam osu! Championship';
+    }, []);
   return (
       <>
           <ToastProvider>

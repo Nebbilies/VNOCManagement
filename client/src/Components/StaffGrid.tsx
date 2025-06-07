@@ -16,6 +16,7 @@ interface Props {
 
 
 function StaffGrid({staffList, toggleRefresh}: Props) {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const {user} = useUser();
     let userRole = "";
     if (user) {
@@ -28,7 +29,7 @@ function StaffGrid({staffList, toggleRefresh}: Props) {
     const onDeleteStaff = async (staffId: number) => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:3001/api/staff/remove/${staffId}`, {
+            const response = await fetch(`${apiBase}/staff/remove/${staffId}`, {
                 credentials: 'include',
                 method: 'DELETE',
             });

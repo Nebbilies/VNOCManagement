@@ -13,6 +13,7 @@ interface Props {
 }
 
 export function EditMatchButton({currentMatch}: Props) {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const {showSuccess, showError} = useToast();
     const { playerOptions, setRefresh } = useContext(MatchesContext);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -62,7 +63,7 @@ export function EditMatchButton({currentMatch}: Props) {
             status: matchStatus,
             matchLink: matchLink || ""
         };
-        const response = await fetch("http://localhost:3001/api/matches/edit/" + currentMatch.id, {
+        const response = await fetch(`${apiBase}/matches/edit/` + currentMatch.id, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"

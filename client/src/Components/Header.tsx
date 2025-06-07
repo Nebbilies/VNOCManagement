@@ -3,7 +3,7 @@ import SidebarHeader from "./SidebarHeader.tsx";
 import logo from "../assets/logo.png";
 import {useEffect} from "react";
 import {useUser} from "../context/UserContext.tsx";
-
+const apiBase = import.meta.env.VITE_API_BASE_URL
 const links = [
     {name: "Home", path: "/"},
     {name: "Staff", path: "/staff"},
@@ -15,13 +15,13 @@ const links = [
 
 export const handleLogOut = () => {
     window.localStorage.removeItem("user");
-    window.location.href = "http://localhost:3001/api/auth/logout";
+    window.location.href = `${apiBase}/auth/logout`;
 }
 
 function Header() {
     const { setUser } = useUser()
     useEffect(() => {
-        fetch("http://localhost:3001/api/auth/me", {
+        fetch(`${apiBase}/auth/me`, {
             credentials: "include",
         })
             .then((res) => {

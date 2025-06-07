@@ -20,6 +20,7 @@ function RescheduleButton({matchId}: Props) {
     const [dateTimeError, setDateTimeError] = useState<boolean>(false);
     const [hoveringReschedule, setHoveringReschedule] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const openModal = () => {
         if (rescheduleRequests.find((req) => req.MatchId === matchId && !['ACCEPTED', 'REJECTED'].includes(req.Status))) {
             showError("You already have a pending reschedule request for this match.");
@@ -48,7 +49,7 @@ function RescheduleButton({matchId}: Props) {
             newDate: newMatchDate,
             newTime: newMatchTime,
         })
-        const response = await fetch('http://localhost:3001/api/resch/add', {
+        const response = await fetch(`${apiBase}/resch/add`, {
             method: 'POST',
             credentials: 'include',
             headers: {

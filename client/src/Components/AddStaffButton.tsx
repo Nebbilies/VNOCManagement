@@ -8,6 +8,7 @@ interface Props {
 }
 
 export function AddStaffButton({toggleRefresh}: Props) {
+    const apiBase = import.meta.env.VITE_API_BASE_URL;
     const [HoveringAddStaff, setHoveringAddStaff] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [userId, setUserId] = useState<number>();
@@ -31,7 +32,7 @@ export function AddStaffButton({toggleRefresh}: Props) {
             return;
         }
         try {
-            const response = await fetch('http://localhost:3001/api/staff/add', {
+            const response = await fetch(`${apiBase}/staff/add`, {
                 credentials: 'include',
                 method: 'POST',
                 headers: {

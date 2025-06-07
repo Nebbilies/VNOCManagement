@@ -19,6 +19,7 @@ function SidebarHeader({ links }: Props) {
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
     };
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     return (
         <div className="lg:hidden flex fixed top-4 right-6 z-999 text-white">
             {user &&
@@ -94,7 +95,7 @@ function SidebarHeader({ links }: Props) {
 
                                 {!user ? (
                                     <Link
-                                        to="http://localhost:3001/api/auth/login"
+                                        to={`${apiBase}/auth/login`}
                                         className="block w-full text-center py-2 px-4 bg-violet-600 rounded-md"
                                         onClick={toggleSidebar}
                                     >

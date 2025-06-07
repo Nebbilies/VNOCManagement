@@ -11,13 +11,14 @@ interface Props {
 
 
 function RescheduleNotificationCard({rescheduleNotification, setRefresh}: Props) {
+    const apiBase = import.meta.env.VITE_API_BASE_URL
     const {showSuccess, showError} = useToast();
     const [loading, setLoading] = useState(false);
     const [notificationInfoMenuOpen, setNotificationInfoMenuOpen] = useState(false);
     const handleRespond = async (Id: number, Status: 'ACCEPTED' | 'REJECTED') => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3001/api/resch/respond', {
+            const response = await fetch(`${apiBase}/resch/respond`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
