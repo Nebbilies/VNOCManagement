@@ -134,7 +134,11 @@ const AddBeatmapButton = ({toggleRefresh, roundList}: AddBeatmapButtonProps) => 
             });
         }
     }, [beatmapSearchId]);
-
+    useEffect(() => {
+        if (roundList.length > 0) {
+            setRoundName(roundList[0].Acronym);
+        }
+    }, [roundList]);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);

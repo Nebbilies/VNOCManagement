@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useContext} from "react";
-import checkValidDateTime from "../../lib/checkValidDateTime.ts";
 import {AnimatePresence, motion} from "motion/react";
 import {Pencil} from 'lucide-react';
 import {Match} from "./MatchesComponent.tsx"
@@ -25,7 +24,6 @@ export function EditMatchButton({currentMatch}: Props) {
     const [matchTime, setMatchTime] = useState(currentMatch.time.split("T")[1].split(":").slice(0, 2).join(":"));
     const [player1Score, setPlayer1Score] = useState<number | null>(currentMatch.player1Score);
     const [player2Score, setPlayer2Score] = useState<number | null>(currentMatch.player2Score);
-    const [dateTimeError, setDateTimeError] = useState<boolean>(false);
     const [samePlayerError, setSamePlayerError] = useState<boolean>(false);
     const [matchLink, setMatchLink] = useState<string | null>(currentMatch.matchLink);
     const [loading, setLoading] = useState<boolean>(false);
@@ -33,13 +31,6 @@ export function EditMatchButton({currentMatch}: Props) {
     const closeModal = () => {
         setIsModalOpen(false);
     }
-    useEffect(() => {
-        if (!checkValidDateTime(matchDate, matchTime)) {
-            setDateTimeError(true);
-        } else  {
-            setDateTimeError(false);
-        }
-    }, [matchDate, matchTime])
     useEffect(() => {
         if (player1Id === player2Id) {
             setSamePlayerError(true);
@@ -49,7 +40,7 @@ export function EditMatchButton({currentMatch}: Props) {
     }, [player1Id, player2Id]);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (dateTimeError || samePlayerError || loading) return;
+        if (samePlayerError || loading) return;
         setLoading(true);
         const matchData = {
             newId: currentMatch.id,
@@ -212,13 +203,6 @@ export function EditMatchButton({currentMatch}: Props) {
                                         />
                                     </div>
                                 </div>
-                                <div className={'mt-2'}>
-                                    {dateTimeError && (
-                                        <div className="text-red-500 text-sm">
-                                            Invalid date or time. Date time must be at least 6 hours from now.
-                                        </div>
-                                    )}
-                                </div>
                                 <div className={'flex gap-4 mt-2 justify-center'}>
                                     <div className={'w-1/2'}>
                                         <label htmlFor="player1Score"
@@ -284,7 +268,7 @@ export function EditMatchButton({currentMatch}: Props) {
                                     </button>
                                     <button
                                         type="submit"
-                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${dateTimeError || samePlayerError || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                                        className={`bg-blue-500 text-white text-2xl rounded w-1/2 hover:bg-blue-600 transition-colors ${samePlayerError || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                                     >
                                         Confirm
                                     </button>
