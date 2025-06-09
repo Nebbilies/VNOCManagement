@@ -35,7 +35,7 @@ function TopHeader({links, logo}: Props) {
         <motion.div
             className={` ${visible ? '' : '-translate-y-18'} bg-[#1b1d20]/50 text-white fixed z-999 duration-500 h-16 font-bold lg:text-xl left-0 top-0 text-md items-center justify-between w-screen border-violet-300 border-b-2 hidden lg:flex px-4 lg:px-36 xl:px-64 shadow-violet-400/20 shadow-md`}>
             <div className="flex items-center justify-center h-full">
-                <a href="/client/public" className="flex w-auto left-3 relative">
+                <a href="/" className="flex w-auto left-3 relative">
                     <div className="w-12 h-auto">
                         <img src={logo} alt="logo" className="h-full aspect-auto"/>
                     </div>
